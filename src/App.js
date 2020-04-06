@@ -10,7 +10,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCopy,
   faArrowLeft,
-  faDownload
+  faDownload,
+  faSave
 } from "@fortawesome/free-solid-svg-icons";
 
 import logo from "./logo.svg";
