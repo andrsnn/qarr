@@ -154,7 +154,7 @@ class Scan extends React.Component {
       }
     );
     } else {
-      alert('Sorry, browser does not support camera access');
+      alert('Sorry, browser does not support camera access. If you are on iOS, please use Safari.');
     }
   }
 
