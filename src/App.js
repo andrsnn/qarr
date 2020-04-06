@@ -10,10 +10,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCopy,
   faArrowLeft,
-  faCameraRetro,
+  faDownload
 } from "@fortawesome/free-solid-svg-icons";
 
-import logo from './logo.svg';
+import logo from "./logo.svg";
 
 var QRCode = require("qrcode");
 
@@ -40,9 +40,29 @@ export default class Root extends React.Component {
         <nav className="navbar" role="navigation" aria-label="main navigation">
           <div className="navbar-brand">
             <a className="navbar-item" href="https://github.com/andrsnn/qarr">
-            <span style={{display: 'none'}}> Icons made by <a href="https://www.flaticon.com/authors/good-ware" title="Good Ware">Good Ware</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> </span>
-              <img src={logo} style={{maxHeight: '4rem'}}/>
-              <span style={{fontFamily: "'Pacifico', cursive", marginLeft: '.25rem', fontSize: '2.75rem'}}>Q Arr</span>
+              <span style={{ display: "none" }}>
+                Icons made by
+                <a
+                  href="https://www.flaticon.com/authors/good-ware"
+                  title="Good Ware"
+                >
+                  Good Ware
+                </a>
+                from
+                <a href="https://www.flaticon.com/" title="Flaticon">
+                  www.flaticon.com
+                </a>
+              </span>
+              <img src={logo} style={{ maxHeight: "4rem" }} />
+              <span
+                style={{
+                  fontFamily: "'Pacifico', cursive",
+                  marginLeft: ".25rem",
+                  fontSize: "2.75rem",
+                }}
+              >
+                Q Arr
+              </span>
             </a>
 
             <a
@@ -64,18 +84,23 @@ export default class Root extends React.Component {
             style={{ display: "flex" }}
           >
             <div className="navbar-start">
+            <a className="navbar-item" href="/create">
+                Create
+              </a>
               <a className="navbar-item" href="/scan">
                 Scan
               </a>
-              <a className="navbar-item" href="/create">
-                Create
-              </a>
+              
             </div>
           </div>
         </nav>
 
         <Switch>
-          <Route exact path="/"></Route>
+          <Route exact path="/">
+            <Section>
+              <Create />
+            </Section>
+          </Route>
           <Route exact path="/scan">
             <Section>
               <Scan></Scan>
@@ -140,21 +165,24 @@ class Scan extends React.Component {
     shouldDisplayResult: false,
   };
 
-  
-  componentDidMount()
-  {
-    if(navigator.getUserMedia){
+  componentDidMount() {
+    if (navigator.getUserMedia) {
       navigator.getUserMedia(
-      {
-        video: true
-      }, 
-      function(localMediaStream){}, 
-      function(err){
-        alert('The following error occurred when trying to access the camera: ' + err); 
-      }
-    );
+        {
+          video: true,
+        },
+        function (localMediaStream) {},
+        function (err) {
+          alert(
+            "The following error occurred when trying to access the camera: " +
+              err
+          );
+        }
+      );
     } else {
-      alert('Sorry, browser does not support camera access. If you are on iOS, please use Safari.');
+      alert(
+        "Sorry, browser does not support camera access. If you are on iOS, please use Safari."
+      );
     }
   }
 
@@ -192,7 +220,10 @@ class Scan extends React.Component {
       return (
         <div className="columns is-mobile is-centered is-vcentered">
           <div className="column is-12">
-            <div className="notification is-success is-light" style={{backgroundColor: '#75776354'}}>
+            <div
+              className="notification is-success is-light"
+              style={{ backgroundColor: "#75776354" }}
+            >
               <pre
                 id="result"
                 className="html"
@@ -255,7 +286,7 @@ class QRCodeComp extends React.Component {
         console.log("success!");
       }
     );
-  }
+  };
 
   componentDidMount() {
     this.renderQrCodeToCanvas();
@@ -269,6 +300,7 @@ class QRCodeComp extends React.Component {
     return (
       <div>
         <canvas
+          id="canvas"
           ref={this.canvas}
           style={{ width: "128px", height: "128px" }}
         ></canvas>
@@ -286,28 +318,47 @@ class Create extends React.Component {
       text: e.target.value,
     });
   };
+  handleDownload = () => {
+    // should be doing this within react + encapsulated within the component...
+    var canvas = document.getElementById("canvas");
+    var link = document.getElementById('link');
+    link.setAttribute('download', 'download.png');
+    link.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+    link.click();
+  }
   render() {
-    const size = window.innerWidth <= 500 ? 270 : 1024;
     return (
       <div className="columns is-mobile is-centered is-vcentered">
         <div className="column is-12">
-          <div className="notification is-success is-light" style={{backgroundColor: '#75776354'}}>
+          <div
+            className="notification is-success is-light"
+            style={{ backgroundColor: "#75776354" }}
+          >
             <div style={{ textAlign: "center" }}>
               <QRCodeComp value={this.state.text} />
             </div>
 
             <br />
+            <a id="link" style={{display: 'none'}}></a>
             <div className="field">
               <div className="control">
                 <textarea
                   onChange={this.handleOnChange}
-                  style={{ color: "black", borderColor: '#757763' }}
+                  style={{ color: "black", borderColor: "#757763" }}
                   className="textarea is-success"
                   placeholder="Type to create..."
                   value={this.state.value}
                 ></textarea>
               </div>
             </div>
+            <button
+              className="button"
+            >
+              <span className="icon is-small">
+                <FontAwesomeIcon icon={faDownload} />
+              </span>
+              <span onClick={this.handleDownload}>Download</span>
+            </button>
           </div>
         </div>
       </div>
