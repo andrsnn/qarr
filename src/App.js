@@ -140,6 +140,24 @@ class Scan extends React.Component {
     shouldDisplayResult: false,
   };
 
+  
+  componentDidMount()
+  {
+    if(navigator.getUserMedia){
+      navigator.getUserMedia(
+      {
+        video: true
+      }, 
+      function(localMediaStream){}, 
+      function(err){
+        alert('The following error occurred when trying to access the camera: ' + err); 
+      }
+    );
+    } else {
+      alert('Sorry, browser does not support camera access');
+    }
+  }
+
   handleDisplayResults = () => {
     setTimeout(() => {
       this.setState({
@@ -225,11 +243,12 @@ class QRCodeComp extends React.Component {
     super(props);
     this.canvas = React.createRef();
   }
-  componentDidUpdate() {
+
+  renderQrCodeToCanvas = () => {
     const scale = window.innerWidth <= 500 ? 5 : 15;
     QRCode.toCanvas(
       this.canvas.current,
-      this.props.value || "",
+      this.props.value || "Type to create...",
       { scale },
       function (error) {
         if (error) console.error(error);
@@ -238,12 +257,20 @@ class QRCodeComp extends React.Component {
     );
   }
 
+  componentDidMount() {
+    this.renderQrCodeToCanvas();
+  }
+
+  componentDidUpdate() {
+    this.renderQrCodeToCanvas();
+  }
+
   render() {
     return (
       <div>
         <canvas
           ref={this.canvas}
-          style={{ width: "640px", height: "640px" }}
+          style={{ width: "128px", height: "128px" }}
         ></canvas>
       </div>
     );
