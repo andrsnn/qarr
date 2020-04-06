@@ -13,7 +13,7 @@ import {
   faCameraRetro,
 } from "@fortawesome/free-solid-svg-icons";
 
-import logo from './logo.png';
+import logo from './logo.svg';
 
 var QRCode = require("qrcode");
 
@@ -40,9 +40,9 @@ export default class Root extends React.Component {
         <nav className="navbar" role="navigation" aria-label="main navigation">
           <div className="navbar-brand">
             <a className="navbar-item" href="https://github.com/andrsnn/qarr">
-              {/* <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div> */}
-              {/* <FontAwesomeIcon icon={faCameraRetro} />{" "} */}
+            {/* Icons made by <a href="https://www.flaticon.com/authors/good-ware" title="Good Ware">Good Ware</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> */}
               <img src={logo} style={{maxHeight: '4rem'}}/>
+              <span style={{fontFamily: "'Pacifico', cursive", marginLeft: '.25rem', fontSize: '2.75rem'}}>Q Arr</span>
             </a>
 
             <a
@@ -192,7 +192,7 @@ class Scan extends React.Component {
       return (
         <div className="columns is-mobile is-centered is-vcentered">
           <div className="column is-12">
-            <div className="notification is-success is-light">
+            <div className="notification is-success is-light" style={{backgroundColor: '#75776354'}}>
               <pre
                 id="result"
                 className="html"
@@ -213,7 +213,7 @@ class Scan extends React.Component {
         </div>
       );
     }
-    const size = window.innerWidth <= 500 ? 256 : 1024;
+    const size = window.innerWidth <= 500 ? 256 : 768;
     return (
       <div className="container is-fluid">
         <div
@@ -291,7 +291,7 @@ class Create extends React.Component {
     return (
       <div className="columns is-mobile is-centered is-vcentered">
         <div className="column is-12">
-          <div className="notification is-success is-light">
+          <div className="notification is-success is-light" style={{backgroundColor: '#75776354'}}>
             <div style={{ textAlign: "center" }}>
               <QRCodeComp value={this.state.text} />
             </div>
@@ -301,7 +301,7 @@ class Create extends React.Component {
               <div className="control">
                 <textarea
                   onChange={this.handleOnChange}
-                  style={{ color: "black" }}
+                  style={{ color: "black", borderColor: '#757763' }}
                   className="textarea is-success"
                   placeholder="Type to create..."
                   value={this.state.value}
