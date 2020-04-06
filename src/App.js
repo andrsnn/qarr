@@ -14,6 +14,8 @@ import {
   faSave
 } from "@fortawesome/free-solid-svg-icons";
 
+import Timer from './Timer';
+
 import logo from "./logo.svg";
 
 var QRCode = require("qrcode");
@@ -160,13 +162,23 @@ function Section(props) {
 }
 
 class Scan extends React.Component {
+  timer = new Timer({count: 60});
   state = {
     result: null,
     isLoading: false,
     shouldDisplayResult: false,
+    countdown: 60
   };
 
   componentDidMount() {
+    this.timer.tick = (count) => {
+      this.setState({
+        countdown: count
+      })
+    }
+    this.timer.end = () => {
+      this.handleGoBack();
+    }
     if (navigator.getUserMedia) {
       navigator.getUserMedia(
         {
@@ -198,6 +210,7 @@ class Scan extends React.Component {
 
   handleScan = (data) => {
     if (data) {
+      this.timer.start();
       this.setState(
         {
           result: data,
@@ -211,9 +224,11 @@ class Scan extends React.Component {
     console.error(err);
   };
   handleGoBack = () => {
+    this.timer.clear();
     this.setState({
       result: null,
       shouldDisplayResult: false,
+      countdown: 60
     });
   };
   render() {
@@ -233,6 +248,9 @@ class Scan extends React.Component {
                 {this.state.result}
               </pre>
               <br />
+              <div>
+              {this.state.countdown}
+              </div>
               <CopyButton target="#result" />
               <button className="button" onClick={this.handleGoBack}>
                 <span className="icon is-small">
@@ -284,7 +302,6 @@ class QRCodeComp extends React.Component {
       { scale },
       function (error) {
         if (error) console.error(error);
-        console.log("success!");
       }
     );
   };
@@ -311,12 +328,34 @@ class QRCodeComp extends React.Component {
 }
 
 class Create extends React.Component {
+    timer = new Timer({count: 60});
   state = {
-    text: "Type to create...",
+    text: "",
+    countdown: 60
   };
+  componentDidMount() {
+    this.timer.tick = (count) => {
+      this.setState({
+        countdown: count
+      })
+    }
+    this.timer.end = () => {
+      this.setState({
+        text: "",
+        countdown: 60
+      })
+    }
+  }
+  componentWillUnmount() {
+    this.timer.clear();
+  }
   handleOnChange = (e) => {
     this.setState({
       text: e.target.value,
+      countdown: 60
+    }, () => {
+      this.timer.start();
+      this.timer.reset();
     });
   };
   handleDownload = () => {
@@ -348,8 +387,11 @@ class Create extends React.Component {
                   style={{ color: "black", borderColor: "#757763" }}
                   className="textarea is-success"
                   placeholder="Type to create..."
-                  value={this.state.value}
+                  value={this.state.text}
                 ></textarea>
+                <div>
+                  {this.state.countdown}
+                </div>
               </div>
             </div>
             <button
