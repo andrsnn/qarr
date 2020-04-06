@@ -13,6 +13,8 @@ import {
   faCameraRetro,
 } from "@fortawesome/free-solid-svg-icons";
 
+import logo from './logo.png';
+
 var QRCode = require("qrcode");
 
 const ClipboardJS = require("clipboard");
@@ -39,8 +41,8 @@ export default class Root extends React.Component {
           <div className="navbar-brand">
             <a className="navbar-item" href="https://github.com/andrsnn/qarr">
               {/* <div>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div> */}
-              <FontAwesomeIcon icon={faCameraRetro} />{" "}
-              <span style={{ marginLeft: "5px" }}>Qarr</span>
+              {/* <FontAwesomeIcon icon={faCameraRetro} />{" "} */}
+              <img src={logo} style={{maxHeight: '4rem'}}/>
             </a>
 
             <a
@@ -172,7 +174,7 @@ class Scan extends React.Component {
       return (
         <div className="columns is-mobile is-centered is-vcentered">
           <div className="column is-12">
-            <div className="notification is-primary">
+            <div className="notification is-success is-light">
               <pre
                 id="result"
                 className="html"
@@ -262,7 +264,7 @@ class Create extends React.Component {
     return (
       <div className="columns is-mobile is-centered is-vcentered">
         <div className="column is-12">
-          <div className="notification is-primary">
+          <div className="notification is-success is-light">
             <div style={{ textAlign: "center" }}>
               <QRCodeComp value={this.state.text} />
             </div>
@@ -273,7 +275,7 @@ class Create extends React.Component {
                 <textarea
                   onChange={this.handleOnChange}
                   style={{ color: "black" }}
-                  className="textarea is-primary"
+                  className="textarea is-success"
                   placeholder="Type to create..."
                   value={this.state.value}
                 ></textarea>
