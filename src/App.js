@@ -8,7 +8,8 @@ import LoadingOverlay from "react-loading-overlay";
 import ReactDOM from "react-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy, faArrowLeft, faCameraRetro } from "@fortawesome/free-solid-svg-icons";
-import ReactLogo from './saber.svg';
+
+var QRCode = require('qrcode')
 
 
 const ClipboardJS = require("clipboard");
@@ -222,9 +223,26 @@ class Scan extends React.Component {
   }
 }
 
-class QRCode extends React.Component {
+class QRCodeComp extends React.Component {
+  constructor(props) {
+    super(props);
+    this.canvas = React.createRef();
+  }
+  componentDidUpdate() {
+    const scale = window.innerWidth <= 500 ? 5 : 15;
+    QRCode.toCanvas(this.canvas.current, this.props.value || '', {scale}, function (error) {
+      if (error) console.error(error)
+      console.log('success!');
+    })
+  }
+ 
   render() {
-    return <div>qrcode</div>
+    return (
+      <div>
+      <canvas ref={this.canvas} style={{width: '640px', height: '640px'}}></canvas>
+
+      </div>
+    )
   }
 }
 
@@ -245,10 +263,7 @@ class Create extends React.Component {
         <div className="column is-12">
           <div className="notification is-primary">
             <div style={{textAlign: 'center'}}>
-            <QRCode
-              className="is-flex-mobile"
-              style={{marginRight: 'auto', marginLeft: 'auto'}}
-              size={size}
+            <QRCodeComp
               value={this.state.text} />
 
             </div>
