@@ -30,5 +30,8 @@ export default class Timer {
     reset = () => {
       this.count = this.countdown;
     } 
+    pause = () => {
+      clearInterval(this.interval);
+    }
   }
   

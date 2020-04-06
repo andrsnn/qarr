@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import "./App.sass";
-
+import "./App.css";
 import QrReader from "react-qr-reader";
 import LoadingOverlay from "react-loading-overlay";
 
@@ -11,10 +11,12 @@ import {
   faCopy,
   faArrowLeft,
   faDownload,
-  faSave
+  faSave,
+  faTrash,
+  faWindowRestore
 } from "@fortawesome/free-solid-svg-icons";
 
-import Timer from './Timer';
+import Timer from "./Timer";
 
 import logo from "./logo.svg";
 
@@ -87,13 +89,12 @@ export default class Root extends React.Component {
             style={{ display: "flex" }}
           >
             <div className="navbar-start">
-            <a className="navbar-item" href="/create">
+              <a className="navbar-item" href="/create">
                 Create
               </a>
               <a className="navbar-item" href="/scan">
                 Scan
               </a>
-              
             </div>
           </div>
         </nav>
@@ -119,9 +120,6 @@ export default class Root extends React.Component {
     );
   }
 }
-
-// You can think of these components as "pages"
-// in your app.
 
 class CopyButton extends React.Component {
   constructor(props) {
@@ -153,6 +151,45 @@ class CopyButton extends React.Component {
   }
 }
 
+class QRCodeComp extends React.Component {
+  constructor(props) {
+    super(props);
+    this.canvas = React.createRef();
+  }
+
+  renderQrCodeToCanvas = () => {
+    const scale = window.innerWidth <= 500 ? 5 : 15;
+    QRCode.toCanvas(
+      this.canvas.current,
+      this.props.value || "Type to create...",
+      { scale },
+      function (error) {
+        if (error) console.error(error);
+      }
+    );
+  };
+
+  componentDidMount() {
+    this.renderQrCodeToCanvas();
+  }
+
+  componentDidUpdate() {
+    this.renderQrCodeToCanvas();
+  }
+
+  render() {
+    return (
+      <div>
+        <canvas
+          id="canvas"
+          ref={this.canvas}
+          style={{ width: "128px", height: "128px" }}
+        ></canvas>
+      </div>
+    );
+  }
+}
+
 function Section(props) {
   return (
     <section className="section">
@@ -161,24 +198,68 @@ function Section(props) {
   );
 }
 
+class Save extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    const entries = [];
+    for (let i = 0; i < this.props.numCodes; i++) {
+      var entry = JSON.parse(localStorage.getItem('code-' + (i + 1)));
+      entries.push(
+        <div
+            className="notification is-success columns"
+            style={{ backgroundColor: "#75776354" }}
+          >
+            <div className="column is-one-quarters">
+            <span>{entry.name}</span>
+
+            </div>
+            <div className="column is-one-quarter">
+              <div>
+              <span className="icon is-small">
+              <FontAwesomeIcon icon={faWindowRestore} />
+
+                </span>
+                <span className="icon is-small">
+              <FontAwesomeIcon icon={faTrash} />
+            </span>
+              </div>
+            
+
+            </div>
+            
+          </div>
+      )
+    }
+    return (
+      <div className="columns is-mobile is-centered is-vcentered">
+        <div className="column is-12">
+          {entries}
+        </div>
+      </div>
+    );
+  }
+}
+
 class Scan extends React.Component {
-  timer = new Timer({count: 60});
+  timer = new Timer({ count: 60 });
   state = {
     result: null,
     isLoading: false,
     shouldDisplayResult: false,
-    countdown: 60
+    countdown: 60,
   };
 
   componentDidMount() {
     this.timer.tick = (count) => {
       this.setState({
-        countdown: count
-      })
-    }
+        countdown: count,
+      });
+    };
     this.timer.end = () => {
       this.handleGoBack();
-    }
+    };
     if (navigator.getUserMedia) {
       navigator.getUserMedia(
         {
@@ -228,7 +309,7 @@ class Scan extends React.Component {
     this.setState({
       result: null,
       shouldDisplayResult: false,
-      countdown: 60
+      countdown: 60,
     });
   };
   render() {
@@ -248,9 +329,7 @@ class Scan extends React.Component {
                 {this.state.result}
               </pre>
               <br />
-              <div>
-              {this.state.countdown}
-              </div>
+              <div>{this.state.countdown}</div>
               <CopyButton target="#result" />
               <button className="button" onClick={this.handleGoBack}>
                 <span className="icon is-small">
@@ -288,87 +367,115 @@ class Scan extends React.Component {
   }
 }
 
-class QRCodeComp extends React.Component {
-  constructor(props) {
-    super(props);
-    this.canvas = React.createRef();
+class Modal extends React.Component {
+  state = {
+    value: ''
   }
-
-  renderQrCodeToCanvas = () => {
-    const scale = window.innerWidth <= 500 ? 5 : 15;
-    QRCode.toCanvas(
-      this.canvas.current,
-      this.props.value || "Type to create...",
-      { scale },
-      function (error) {
-        if (error) console.error(error);
-      }
-    );
-  };
-
-  componentDidMount() {
-    this.renderQrCodeToCanvas();
+  handleChange = (e) => {
+    this.setState({
+      value: e.target.value
+    })
   }
-
-  componentDidUpdate() {
-    this.renderQrCodeToCanvas();
-  }
-
   render() {
     return (
-      <div>
-        <canvas
-          id="canvas"
-          ref={this.canvas}
-          style={{ width: "128px", height: "128px" }}
-        ></canvas>
+      <div className="modal" style={{display: 'block'}}>
+      <div className="modal-background"></div>
+      <div className="modal-card">
+        <header className="modal-card-head">
+          <p className="modal-card-title">Modal title</p>
+          <button className="delete" aria-label="close"></button>
+        </header>
+        <section className="modal-card-body">
+        <input className="input" type="text" placeholder="Enter name..." onChange={this.handleChange} value={this.state.value}/>
+        </section>
+        <footer className="modal-card-foot">
+          <button onClick={() => this.props.onSave(this.state.value)} className="button is-success">Save</button>
+          <button onClick={this.props.onCancel} className="button">Cancel</button>
+        </footer>
       </div>
-    );
+      </div>
+    )
   }
 }
 
 class Create extends React.Component {
-    timer = new Timer({count: 60});
+  timer = new Timer({ count: 60 });
   state = {
     text: "",
-    countdown: 60
+    countdown: 60,
   };
   componentDidMount() {
     this.timer.tick = (count) => {
       this.setState({
-        countdown: count
-      })
-    }
+        countdown: count,
+      });
+    };
     this.timer.end = () => {
       this.setState({
         text: "",
-        countdown: 60
-      })
-    }
+        countdown: 60,
+      });
+    };
   }
   componentWillUnmount() {
     this.timer.clear();
   }
   handleOnChange = (e) => {
-    this.setState({
-      text: e.target.value,
-      countdown: 60
-    }, () => {
-      this.timer.start();
-      this.timer.reset();
-    });
+    this.setState(
+      {
+        text: e.target.value,
+        countdown: 60,
+      },
+      () => {
+        this.timer.start();
+        this.timer.reset();
+      }
+    );
   };
   handleDownload = () => {
     // should be doing this within react + encapsulated within the component...
     var canvas = document.getElementById("canvas");
-    var link = document.getElementById('link');
-    link.setAttribute('download', 'download.png');
-    link.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+    var link = document.getElementById("link");
+    link.setAttribute("download", "download.png");
+    link.setAttribute(
+      "href",
+      canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+    );
     link.click();
+  };
+  handleSave = () => {
+    this.timer.pause();
+    this.setState({
+      displayModal: true
+    })
+  };
+  handleOnCancel = () => {
+    this.setState({
+      displayModal: false
+    })
+  }
+  handleOnSave = (value) => {
+    console.log(value, this.state.text);
+    const numCodes = parseInt(localStorage.getItem('number-of-persisted-codes') || '0');
+    const nextCode = numCodes + 1;
+    localStorage.setItem('number-of-persisted-codes', nextCode);
+    localStorage.setItem('code-' + nextCode, JSON.stringify({
+      name: value,
+      // security theatre, TODO need to encrypt with password or local key or introduce backend component
+      // base64 for consistency
+      value: btoa(this.state.text)
+    }))
+    this.setState({
+      displayModal: false
+    })
   }
   render() {
     return (
       <div className="columns is-mobile is-centered is-vcentered">
+        {this.state.displayModal && <Modal
+          onSave={this.handleOnSave}
+          onCancel={this.handleOnCancel}
+        /> }
         <div className="column is-12">
           <div
             className="notification is-success is-light"
@@ -379,7 +486,7 @@ class Create extends React.Component {
             </div>
 
             <br />
-            <a id="link" style={{display: 'none'}}></a>
+            <a id="link" style={{ display: "none" }}></a>
             <div className="field">
               <div className="control">
                 <textarea
@@ -389,20 +496,25 @@ class Create extends React.Component {
                   placeholder="Type to create..."
                   value={this.state.text}
                 ></textarea>
-                <div>
-                  {this.state.countdown}
-                </div>
+                <div>{this.state.countdown}</div>
               </div>
             </div>
-            <button
-              className="button"
-            >
+            <button className="button">
               <span className="icon is-small">
                 <FontAwesomeIcon icon={faDownload} />
               </span>
               <span onClick={this.handleDownload}>Download</span>
             </button>
+            <button className="button">
+              <span className="icon is-small">
+                <FontAwesomeIcon icon={faSave} />
+              </span>
+              <span onClick={this.handleSave}>Save</span>
+            </button>
           </div>
+          <hr />
+          <Save 
+            numCodes={parseInt(localStorage.getItem('number-of-persisted-codes') || '0')}/>
         </div>
       </div>
     );
