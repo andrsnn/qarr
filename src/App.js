@@ -40,7 +40,7 @@ export default class Root extends React.Component {
         <nav className="navbar" role="navigation" aria-label="main navigation">
           <div className="navbar-brand">
             <a className="navbar-item" href="https://github.com/andrsnn/qarr">
-            {/* Icons made by <a href="https://www.flaticon.com/authors/good-ware" title="Good Ware">Good Ware</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> */}
+            <span style={{display: 'none'}}> Icons made by <a href="https://www.flaticon.com/authors/good-ware" title="Good Ware">Good Ware</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a> </span>
               <img src={logo} style={{maxHeight: '4rem'}}/>
               <span style={{fontFamily: "'Pacifico', cursive", marginLeft: '.25rem', fontSize: '2.75rem'}}>Q Arr</span>
             </a>
