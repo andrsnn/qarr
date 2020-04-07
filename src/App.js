@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import "./App.sass";
+import "./App.css";
 
 import QrReader from "react-qr-reader";
 import LoadingOverlay from "react-loading-overlay";
@@ -334,6 +335,12 @@ class Modal extends React.Component {
     this.setState({
       [key]: e.target.value
     })
+  }
+  componentDidMount() {
+    document.querySelector('html').classList.add('modal-is-open');
+  }
+  componentWillUnmount() {
+    document.querySelector('html').classList.remove('modal-is-open');
   }
   render() {
     return (
