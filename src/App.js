@@ -11,10 +11,10 @@ import {
   faCopy,
   faArrowLeft,
   faDownload,
-  faSave
+  faWifi
 } from "@fortawesome/free-solid-svg-icons";
 
-import Timer from './Timer';
+import Timer from "./Timer";
 
 import logo from "./logo.svg";
 
@@ -87,13 +87,12 @@ export default class Root extends React.Component {
             style={{ display: "flex" }}
           >
             <div className="navbar-start">
-            <a className="navbar-item" href="/create">
+              <a className="navbar-item" href="/create">
                 Create
               </a>
               <a className="navbar-item" href="/scan">
                 Scan
               </a>
-              
             </div>
           </div>
         </nav>
@@ -162,23 +161,23 @@ function Section(props) {
 }
 
 class Scan extends React.Component {
-  timer = new Timer({count: 60});
+  timer = new Timer({ count: 60 });
   state = {
     result: null,
     isLoading: false,
     shouldDisplayResult: false,
-    countdown: 60
+    countdown: 60,
   };
 
   componentDidMount() {
     this.timer.tick = (count) => {
       this.setState({
-        countdown: count
-      })
-    }
+        countdown: count,
+      });
+    };
     this.timer.end = () => {
       this.handleGoBack();
-    }
+    };
     if (navigator.getUserMedia) {
       navigator.getUserMedia(
         {
@@ -228,7 +227,7 @@ class Scan extends React.Component {
     this.setState({
       result: null,
       shouldDisplayResult: false,
-      countdown: 60
+      countdown: 60,
     });
   };
   render() {
@@ -248,9 +247,7 @@ class Scan extends React.Component {
                 {this.state.result}
               </pre>
               <br />
-              <div>
-              {this.state.countdown}
-              </div>
+              <div>{this.state.countdown}</div>
               <CopyButton target="#result" />
               <button className="button" onClick={this.handleGoBack}>
                 <span className="icon is-small">
@@ -327,48 +324,138 @@ class QRCodeComp extends React.Component {
   }
 }
 
+class Modal extends React.Component {
+  state = {
+    name: '',
+    password: '',
+    hidden: false
+  }
+  handleChange = (key, e) => {
+    this.setState({
+      [key]: e.target.value
+    })
+  }
+  render() {
+    return (
+      <div className="modal" style={{display: 'block'}}>
+      <div className="modal-background"></div>
+      <div className="modal-card" style={{marginTop: '20px'}}>
+        <header className="modal-card-head">
+          <p className="modal-card-title">Create Wifi QR code</p>
+          <button className="delete" aria-label="close"></button>
+        </header>
+        <section className="modal-card-body">
+        <div className="field">
+          <label className="label">Name</label>
+          <div className="control">
+          <input className="input" type="text" placeholder="Enter network name..." onChange={this.handleChange.bind(this, 'name')} value={this.state.name}/>
+          </div>
+        </div>
+        <div className="field">
+          <label className="label">Password</label>
+          <div className="control">
+          <input className="input" type="password" autoComplete="off" placeholder="Enter password..." onChange={this.handleChange.bind(this, 'password')} value={this.state.password}/>
+          </div>
+        </div>
+        <label className="checkbox">
+          <input type="checkbox" onChange={this.handleChange.bind(this, 'hidden')} value={this.state.hidden}/>
+          <span>  Hidden</span>
+        </label>
+        </section>
+        <footer className="modal-card-foot">
+          <button onClick={() => this.props.onSave({
+            name: this.state.name,
+            password: this.state.password,
+            hidden: this.state.hidden
+          })} className="button is-success">Done</button>
+          <button onClick={this.props.onCancel} className="button">Cancel</button>
+        </footer>
+      </div>
+      </div>
+    )
+  }
+}
+
+
 class Create extends React.Component {
-    timer = new Timer({count: 60});
+  timer = new Timer({ count: 60 });
   state = {
     text: "",
-    countdown: 60
+    countdown: 60,
+    displayWifiModal: false
   };
   componentDidMount() {
     this.timer.tick = (count) => {
       this.setState({
-        countdown: count
-      })
-    }
+        countdown: count,
+      });
+    };
     this.timer.end = () => {
       this.setState({
         text: "",
-        countdown: 60
-      })
-    }
+        countdown: 60,
+      });
+    };
   }
   componentWillUnmount() {
     this.timer.clear();
   }
   handleOnChange = (e) => {
-    this.setState({
-      text: e.target.value,
-      countdown: 60
-    }, () => {
-      this.timer.start();
-      this.timer.reset();
-    });
+    this.setState(
+      {
+        text: e.target.value,
+        countdown: 60,
+      },
+      () => {
+        this.timer.start();
+        this.timer.reset();
+      }
+    );
   };
   handleDownload = () => {
     // should be doing this within react + encapsulated within the component...
     var canvas = document.getElementById("canvas");
-    var link = document.getElementById('link');
-    link.setAttribute('download', 'download.png');
-    link.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+    var link = document.getElementById("link");
+    link.setAttribute("download", "download.png");
+    link.setAttribute(
+      "href",
+      canvas.toDataURL("image/png").replace("image/png", "image/octet-stream")
+    );
     link.click();
+  };
+  handleOpenWifi = () => {
+    this.timer.pause();
+    this.setState({
+      displayWifiModal: true
+    })
+  }
+  handleWifiDone = ({name, password, hidden}) => {
+    
+    const wifiStr = `WIFI:T:WPA;S:${name};P:${password};${hidden ? 'true' : ''};`
+    this.setState(
+      {
+        text: wifiStr,
+        countdown: 60,
+        displayWifiModal: false
+      },
+      () => {
+        this.timer.start();
+        this.timer.reset();
+      }
+    );
+  }
+  handleCloseWifi = () => {
+    this.timer.start();
+    this.setState({
+      displayWifiModal: false
+    })
   }
   render() {
     return (
       <div className="columns is-mobile is-centered is-vcentered">
+        {this.state.displayWifiModal && <Modal
+          onSave={this.handleWifiDone}
+          onCancel={this.handleCloseWifi}/>}
         <div className="column is-12">
           <div
             className="notification is-success is-light"
@@ -379,7 +466,7 @@ class Create extends React.Component {
             </div>
 
             <br />
-            <a id="link" style={{display: 'none'}}></a>
+            <a id="link" style={{ display: "none" }}></a>
             <div className="field">
               <div className="control">
                 <textarea
@@ -389,18 +476,20 @@ class Create extends React.Component {
                   placeholder="Type to create..."
                   value={this.state.text}
                 ></textarea>
-                <div>
-                  {this.state.countdown}
-                </div>
+                <div>{this.state.countdown}</div>
               </div>
             </div>
-            <button
-              className="button"
-            >
+            <button onClick={this.handleDownload} className="button">
               <span className="icon is-small">
                 <FontAwesomeIcon icon={faDownload} />
               </span>
-              <span onClick={this.handleDownload}>Download</span>
+              <span >Download</span>
+            </button>
+            <button  onClick={this.handleOpenWifi} className="button" style={{marginLeft: '10px'}}>
+              <span className="icon is-small">
+                <FontAwesomeIcon icon={faWifi} />
+              </span>
+              <span>Wifi</span>
             </button>
           </div>
         </div>
