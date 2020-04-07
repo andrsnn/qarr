@@ -321,7 +321,7 @@ class QRCodeComp extends React.Component {
         <canvas
           id="canvas"
           ref={this.canvas}
-          style={{ width: "128px", height: "128px", maxWidth: '375px', maxHeight: '375px' }}
+          style={{ width: "128px", height: "128px", maxWidth: '400px', maxHeight: '400px' }}
         ></canvas>
       </div>
     );
