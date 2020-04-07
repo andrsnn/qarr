@@ -1,3 +1,7 @@
 html.modal-is-open {
   overflow: hidden;
 }
+
+.modal-card {
+  max-width: calc(100vw - 40px);
+}
