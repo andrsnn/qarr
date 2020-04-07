@@ -12,16 +12,18 @@ import {
   faCopy,
   faArrowLeft,
   faDownload,
-  faWifi
+  faWifi,
+  faDice
 } from "@fortawesome/free-solid-svg-icons";
 
 import Timer from "./Timer";
 
 import logo from "./logo.svg";
 
-var QRCode = require("qrcode");
+const QRCode = require("qrcode");
 
 const ClipboardJS = require("clipboard");
+const password = require('./password');
 
 export default class Root extends React.Component {
   state = {
@@ -349,7 +351,7 @@ class Modal extends React.Component {
       <div className="modal-card" style={{marginTop: '20px'}}>
         <header className="modal-card-head">
           <p className="modal-card-title">Create Wifi QR code</p>
-          <button className="delete" aria-label="close"></button>
+          <button className="delete" onClick={this.props.onCancel} aria-label="close"></button>
         </header>
         <section className="modal-card-body">
         <div className="field">
@@ -452,9 +454,20 @@ class Create extends React.Component {
     );
   }
   handleCloseWifi = () => {
-    this.timer.start();
+    this.timer.resume();
     this.setState({
       displayWifiModal: false
+    })
+  }
+  handleRandom = () => {
+    var rnd = password.generate(32);
+    this.setState({
+      text: rnd,
+      countdown: 60
+    },
+    () => {
+      this.timer.start();
+      this.timer.reset();
     })
   }
   render() {
@@ -496,7 +509,11 @@ class Create extends React.Component {
               <span className="icon is-small">
                 <FontAwesomeIcon icon={faWifi} />
               </span>
-              <span>Wifi</span>
+            </button>
+            <button  onClick={this.handleRandom} className="button">
+              <span className="icon is-small">
+                <FontAwesomeIcon icon={faDice} />
+              </span>
             </button>
           </div>
         </div>

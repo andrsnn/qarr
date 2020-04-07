@@ -34,5 +34,10 @@ export default class Timer {
       clearInterval(this.interval);
       this.interval = null;
     }
+    resume = () => {
+      if (!this.interval && this.count !== this.countdown) {
+        this.start();
+      }
+    }
   }
   
