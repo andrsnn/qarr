@@ -1,4 +1,4 @@
-class Password {
+export default class Password {
   _pattern = /[a-zA-Z0-9_\-\+\.]/;
   _getRandomByte = () => {
     // http://caniuse.com/#feat=getrandomvalues
@@ -28,5 +28,3 @@ class Password {
       .join("");
   };
 }
-
-module.exports = new Password();

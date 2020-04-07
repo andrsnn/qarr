@@ -17,13 +17,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import Timer from "./Timer";
+import Password from './password';
 
 import logo from "./logo.svg";
 
 const QRCode = require("qrcode");
 
 const ClipboardJS = require("clipboard");
-const password = require('./password');
+const password = new Password();
 
 export default class Root extends React.Component {
   state = {
