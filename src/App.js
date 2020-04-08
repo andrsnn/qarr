@@ -11,6 +11,7 @@ import logo from "./logo.svg";
 import { Section } from "./Section";
 import { Scan } from "./Scan";
 import { Create } from "./Create";
+import Send from './Send';
 
 export const password = new Password();
 
@@ -59,18 +60,6 @@ export default class Root extends React.Component {
                 Q Arr
               </span>
             </a>
-
-            <a
-              role="button"
-              className={burgerClassName}
-              aria-label="menu"
-              aria-expanded={this.state.isBurgerExtended ? "true" : "false"}
-              data-target="navbarBasicExample"
-            >
-              <span aria-hidden="true"></span>
-              <span aria-hidden="true"></span>
-              <span aria-hidden="true"></span>
-            </a>
           </div>
 
           <div
@@ -84,6 +73,9 @@ export default class Root extends React.Component {
               </a>
               <a className="navbar-item" href="/scan">
                 Scan
+              </a>
+              <a className="navbar-item" href="/send">
+                Send
               </a>
             </div>
           </div>
@@ -103,6 +95,11 @@ export default class Root extends React.Component {
           <Route path="/create">
             <Section>
               <Create />
+            </Section>
+          </Route>
+          <Route path="/send">
+            <Section>
+              <Send />
             </Section>
           </Route>
         </Switch>
