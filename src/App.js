@@ -1,9 +1,7 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.sass";
 import "./App.css";
-
-import ReactDOM from "react-dom";
 
 import Password from './password';
 
@@ -11,27 +9,12 @@ import logo from "./logo.svg";
 import { Section } from "./Section";
 import { Scan } from "./Scan";
 import { Create } from "./Create";
-// import Send from './Send';
 import SendSignalHub from './SendSignalHub';
 
 export const password = new Password();
 
 export default class Root extends React.Component {
-  state = {
-    isBurgerExtended: false,
-  };
-  handleBurgerClick = (e) => {
-    this.setState({
-      isBurgerExtended: !this.state.isBurgerExtended,
-    });
-  };
   render() {
-    let burgerClassName = "navbar-burger burger";
-
-    if (this.state.isBurgerExtended) {
-      burgerClassName += " is-active";
-    }
-
     return (
       <Router>
         <nav className="navbar" role="navigation" aria-label="main navigation">
@@ -50,7 +33,7 @@ export default class Root extends React.Component {
                   www.flaticon.com
                 </a>
               </span>
-              <img src={logo} style={{ maxHeight: "4rem" }} />
+              <img alt="Qarr" src={logo} style={{ maxHeight: "4rem" }} />
               <span
                 style={{
                   fontFamily: "'Pacifico', cursive",

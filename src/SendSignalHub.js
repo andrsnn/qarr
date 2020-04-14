@@ -4,20 +4,14 @@ import { v4 as uuid } from "uuid";
 import deviceInfo from "./device-info";
 
 import { QRCodeComp } from "./QRCodeComp";
-import QrReader from "react-qr-reader";
-import LoadingOverlay from "react-loading-overlay";
 import { CopyButton } from "./CopyButton";
-import { ChatFeed, Message } from "react-chat-ui";
 import ChatWindow from "./react-chat-window/components/ChatWindow";
 import WebRTC from "./webrtc";
 
 var signalhub = require("signalhub");
 const info = deviceInfo.get()
 
-var loc = "http://" + window.location.hostname + ":9000"
 var hub = signalhub("qarr", [
-  // 'https://signalhub-jccqtwhdwc.now.sh',
-  //   "https://signalhub-hzbibrznqa.now.sh",
   "https://qarr.herokuapp.com/",
 ]);
 
@@ -527,52 +521,6 @@ export default class Send extends React.Component {
   };
 
   render() {
-    const link = window.location.href + `?data=${this.state.value}`;
-    // 75776354
-    const size = window.innerWidth <= 500 ? 400 : 768;
-    // if (this.state.peers.length) {
-    //     return (
-
-    //         <div className="columns notification is-success is-light" style={{ marginLeft: 'auto', marginRight: 'auto', width: size + 'px', borderColor: '#75776354', backgroundColor: "#eff0eb", borderRadius: '4px', paddingRight: '24px' }}>
-    //             <div className="column">
-    //            <ChatFeed
-    //                 messages={[
-    //                     new Message({id: 0, message: 'testing', senderName: '1'}),
-    //                     new Message({id: 1, message: 'testing2', senderName: '2'}),
-    //                     new Message({id: 2, message: 'testing3', senderName: '1'})
-    //                 ]} // Boolean: list of message objects
-    //                 // isTyping={this.state.is_typing} // Boolean: is the recipient typing
-    //                 hasInputField={false} // Boolean: use our input, or use your own
-    //                 showSenderName // show the name of the user who sent the message
-    //                 bubblesCentered={false} //Boolean should the bubbles be centered in the feed?
-    //                 // JSON: Custom bubble styles
-    //                 bubbleStyles={
-    //                     {
-    //                     text: {
-    //                         fontSize: 14
-    //                     },
-    //                     chatbubble: {
-    //                         borderRadius: 3,
-    //                         padding: 10
-    //                     }
-    //                     }
-    //                 }
-    //                 />
-    //             <div className="field has-addons" style={{marginLeft: 'auto', marginRight: 'auto', width: '100%'}}>
-    //                     <div className="control" style={{width: '100%'}}>
-    //                         <input className="input" type="text" id="joinLink" defaultValue={''}/>
-    //                     </div>
-    //                     <div className="control">
-    //                         <a className="button is-info">
-    //                             Send
-    //                         </a>
-    //                     </div>
-    //                 </div>
-    //             </div>
-
-    //         </div>
-    //     )
-    // }
     if (this.state.peers.length) {
       return (
         <ChatWindow
@@ -594,22 +542,6 @@ export default class Send extends React.Component {
         style={{ backgroundColor: "#75776354", paddingRight: "24px" }}
       >
         <div className="column" style={{ textAlign: "center" }}>
-          {/* <textarea
-                        onChange={this.handleOnChange}
-                        style={{ color: "black", borderColor: "#757763" }}
-                        className="textarea is-success"
-                        placeholder="Room"
-                        value={this.state.value}></textarea>
-                    <button onClick={this.handleGenerate} className="button">
-                        <span className="icon is-small">icon</span>
-                        <span>Generate</span>
-                    </button>
-                    <button onClick={this.handleJoin} className="button">
-                        <span className="icon is-small">icon</span>
-                        <span>Join</span>
-                    </button>
-                     */}
-          {/* <LoadingOverlay active={this.state.isLoading} spinner> */}
           <div>
             {!this.state.value && (
               <div>

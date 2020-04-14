@@ -33,7 +33,6 @@ var module = {
     matchItem: function (string, data) {
         var i = 0,
             j = 0,
-            html = '',
             regex,
             regexv,
             match,
