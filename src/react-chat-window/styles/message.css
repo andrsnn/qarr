@@ -3,7 +3,10 @@
   /* width: 100%; */
   /* margin: auto; */
   padding-bottom: 10px;
-  display: flex;
+  display: -webkit-box;   /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+  display: -ms-flexbox;  /* TWEENER - IE 10 */
+  display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+  display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
   padding-left: 20px;
   padding-right: 20px;
   width: calc(100% - 50px);
@@ -11,7 +14,10 @@
 
 .sc-message--content {
   width: 100%;
-  display: flex;
+  display: -webkit-box;   /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+  display: -ms-flexbox;  /* TWEENER - IE 10 */
+  display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+  display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
 }
 
 .sc-message--content.sent {
@@ -84,7 +90,10 @@
   border: solid 1px #CCCDD1;
   padding: 15px 20px;
   border-radius: 5px;
-  display: flex;
+  display: -webkit-box;   /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+  display: -ms-flexbox;  /* TWEENER - IE 10 */
+  display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+  display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
   font-weight: 300;
   font-size: 14px;
   line-height: 1.4;

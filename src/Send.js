@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React from "react";
 
@@ -11,6 +12,7 @@ import WebRTC from "./webrtc";
 
 var signalhub = require("signalhub");
 const info = deviceInfo.get();
+const isSafari = info.browser.name.includes('Safari');
 
 var hub = signalhub("qarr", ["https://qarr.herokuapp.com/"]);
 
@@ -94,6 +96,10 @@ export default class Send extends React.Component {
     super(props);
     this.webrtc = new WebRTC();
     this.webrtc.onMessage = async (msg) => {
+      if (isSafari && this.interval) {
+        clearInterval(this.interval);
+        this.interval = null;
+      }
       msg = await decrypt(msg, this.cryptoKey);
 
       if (msg.clientId !== this.state.clientId) {
@@ -314,6 +320,22 @@ export default class Send extends React.Component {
           }
         }
         if (message.clientId !== this.state.clientId) {
+          // total safari hack because it doesn't support the onopen event for some bizarre reason
+          if (message.event === 'offer' || message.event === 'answer' && isSafari) {
+            this.interval = setInterval(() => {
+              this.setState({
+                webrtcConnected: true
+              }, () => {
+                this.webrtc.isOpen = true;
+                this.sendWebRtc({
+                  event: "message",
+                  message: 'Safari establish connection',
+                  clientId: this.state.clientId
+                })
+              })
+            }, 7000);
+          }
+
           if (message.event === "offer") {
             const messages = this.state.messages;
             messages.push({
@@ -445,8 +467,8 @@ export default class Send extends React.Component {
                           <QRCodeComp
                             value={value}
                             style={{
-                              maxWidth: "225px",
-                              maxHeight: "225px",
+                              maxWidth: (document.documentElement.clientWidth <= 500 ? "225px" : '400px'),
+                              maxHeight: (document.documentElement.clientWidth <= 500 ? "225px" : '400px'),
                               width: "100%",
                             }}
                           />
@@ -458,6 +480,7 @@ export default class Send extends React.Component {
                               marginLeft: "auto",
                               marginRight: "auto",
                               width: "calc(100%)",
+                              width: '-webkit-calc(100%)'
                             }}
                           >
                             <div
