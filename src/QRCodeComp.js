@@ -6,8 +6,7 @@ export class QRCodeComp extends React.Component {
     this.canvas = React.createRef();
   }
   renderQrCodeToCanvas = () => {
-    console.log(this.props);
-    const scale = this.props.scale || (window.innerWidth <= 500 ? 5 : 15);
+    const scale = this.props.scale || (document.documentElement.clientWidth <= 500 ? 5 : 15);
 
     QRCode.toCanvas(this.canvas.current, this.props.value || "Type to create...", { scale }, function (error) {
       if (error)

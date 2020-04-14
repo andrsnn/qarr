@@ -93,7 +93,7 @@ export class Scan extends React.Component {
         </div>
       </div>);
     }
-    const size = window.innerWidth <= 500 ? 256 : 768;
+    const size = document.documentElement.clientWidth <= 500 ? 256 : 768;
     return (<div className="container is-fluid">
       <div style={{
         width: size + "px",
