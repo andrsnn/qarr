@@ -475,12 +475,11 @@ export default class Send extends React.Component {
                         </div>
                         <div>
                           <div
-                            className="field has-addons"
+                            className="field has-addons width-100"
                             style={{
                               marginLeft: "auto",
                               marginRight: "auto",
-                              width: "calc(100%)",
-                              width: '-webkit-calc(100%)'
+                              width: "100%"
                             }}
                           >
                             <div

@@ -2,6 +2,7 @@
   overflow: auto;
   width: 100%;
   max-height: calc(100% - 40px);
+  -webkit-max-height: calc(100% - 40px);
   box-sizing: border-box;
   padding: 15px;
 }
