@@ -191,9 +191,9 @@ export default class Send extends React.Component {
                           <QRCodeComp
                             value={query.data}
                             style={{
-                              maxWidth: "400px",
                               width: "100%",
-                              maxHeight: "400px",
+                              maxWidth: (document.documentElement.clientWidth <= 500 ? "225px" : '400px'),
+                              maxHeight: (document.documentElement.clientWidth <= 500 ? "225px" : '400px')
                             }}
                           />
                         </div>
@@ -203,7 +203,7 @@ export default class Send extends React.Component {
                             style={{
                               marginLeft: "auto",
                               marginRight: "auto",
-                              width: "400px",
+                              width: "100%"
                             }}
                           >
                             <div className="control" style={{ width: "320px" }}>

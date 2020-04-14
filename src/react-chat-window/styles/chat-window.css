@@ -39,13 +39,15 @@ div.sc-message--me {
   margin-left: auto;
   padding-left: 0px;
   width: calc(100% - 170px);
-  -webkit-width: calc(100% - 170px);
+  width: -webkit-calc(100% - 170px);
+  width: -moz-calc(100% - 170px);
 }
 div.sc-message--them {
   margin-right: auto;
   padding-left: 30px;
   width: calc(100% - 170px);
-  -webkit-width: calc(100% - 170px);
+  width: -webkit-calc(100% - 170px);
+  width: -moz-calc(100% - 170px);
 }
 div.sc-message--narrator {
   margin-left: auto;

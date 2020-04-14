@@ -10,7 +10,8 @@
   padding-left: 20px;
   padding-right: 20px;
   width: calc(100% - 50px);
-  -webkit-width: calc(100% - 50px);
+  width: -webkit-calc(100% - 50px);
+  width: -moz-calc(100% - 50px);
 }
 
 .sc-message--content {
@@ -55,16 +56,20 @@
   white-space: pre-wrap;
   -webkit-font-smoothing: subpixel-antialiased;
   word-wrap: break-word;
+  width: 100%;
   width: calc(100% - 90px);
-  -webkit-width: calc(100% - 90px);
+  width: -webkit-calc(100% - 90px);
+  width: -moz-calc(100% - 90px);
   font-family: "Nunito", sans-serif;
 }
 
 .sc-message--content.sent .sc-message--text {
   color: white;
   background-color: #4e8cff;
+  width: 100%;
   max-width: calc(100% - 120px);
-  -webkit-max-width: calc(100% - 120px);
+  max-width: -webkit-calc(100% - 120px);
+  max-width: -moz-calc(100% - 120px);
   word-wrap: break-word;
 }
 

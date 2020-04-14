@@ -3,7 +3,10 @@ import TextMessage from './TextMessage';
 import EmojiMessage from './EmojiMessage';
 import FileMessage from './FileMessage';
 import chatIconUrl from './../../assets/chat-icon.svg';
+import deviceInfo from '../../../device-info';
 
+const info = deviceInfo.get();
+const isSafari = info.browser.name.includes('Safari');
 
 class Message extends Component {
 
@@ -29,12 +32,15 @@ class Message extends Component {
     ];
     const messageClassList = [
       'sc-message',
-      (this.props.message.author === 'me'
-        ? 'sc-message--me'
-        : this.props.message.author === 'them'
-        ? 'sc-message--them'
-        : 'sc-message--narrator')
-    ]
+      (
+        isSafari
+          ? 'sc-message--narrator'
+          : this.props.message.author === 'me'
+            ? 'sc-message--me'
+            : this.props.message.author === 'them'
+              ? 'sc-message--them'
+              : 'sc-message--narrator')
+    ];
     return (
       <div className={messageClassList.join(' ')}>
         <div className={contentClassList.join(' ')}>
