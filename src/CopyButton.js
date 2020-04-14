@@ -16,7 +16,11 @@ export class CopyButton extends React.Component {
     this.clipboard.destroy();
   }
   render() {
-    return (<button className="button" ref={this.triggerCopy} data-clipboard-target={this.props.target}>
+    let classNames = 'button';
+    if (this.props.className) {
+      classNames += ' ' + this.props.className;
+    }
+    return (<button className={classNames} ref={this.triggerCopy} data-clipboard-target={this.props.target}>
       <span className="icon is-small">
         <FontAwesomeIcon icon={faCopy} />
       </span>

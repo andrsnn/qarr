@@ -36,14 +36,24 @@ export class Scan extends React.Component {
   }
   handleDisplayResults = () => {
     setTimeout(() => {
+      try {
+        const e = JSON.parse(atob(this.state.result));
+        if (e.event === 'qarr-join-chat') {
+          return window.location.replace(window.location.origin + `/send?data=${this.state.result}`)
+        }
+      }
+      catch(e) {
+
+      }
       this.setState({
         shouldDisplayResult: true,
         isLoading: false,
       });
-    }, 2000);
+    }, 1000);
   };
   handleScan = (data) => {
     if (data) {
+      
       this.timer.start();
       this.setState({
         result: data,

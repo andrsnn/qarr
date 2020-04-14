@@ -8,7 +8,7 @@ import { password } from "./App";
 export class Create extends React.Component {
   timer = new Timer({ count: 60 });
   state = {
-    text: "",
+    text: "Type to create...",
     countdown: 60,
     displayWifiModal: false
   };
