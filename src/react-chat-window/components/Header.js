@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import closeIcon from './../assets/close-icon.png';
 import logo from '../../logo.svg';
 
 class Header extends Component {

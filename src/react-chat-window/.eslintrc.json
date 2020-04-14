@@ -41,7 +41,8 @@
         "semi": [
             "error",
             "always"
-        ]
+        ],
+        "no-useless-escape": "off"
     },
     "settings": {
         "react": {
