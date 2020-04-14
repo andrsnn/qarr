@@ -13,14 +13,24 @@ export class QRCodeComp extends React.Component {
     });
   };
   componentDidMount() {
-    this.renderQrCodeToCanvas();
+    if (this.props.value) {
+      this.renderQrCodeToCanvas();
+    }
   }
   componentDidUpdate() {
-    this.renderQrCodeToCanvas();
+    if (this.props.value) {
+      this.renderQrCodeToCanvas();
+    }
   }
   render() {
+    const style = Object.assign({},
+      { width: "128px", height: "128px", maxWidth: '400px', maxHeight: '400px' }
+    , this.props.style || {});
+    if (!this.props.value) {
+      return this.props.defaultComponent || '';
+    }
     return (<div>
-      <canvas id="canvas" ref={this.canvas} style={{ width: "128px", height: "128px", maxWidth: '400px', maxHeight: '400px' }}></canvas>
+      <canvas id="canvas" ref={this.canvas} style={style}></canvas>
     </div>);
   }
 }

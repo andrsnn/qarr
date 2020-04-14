@@ -11,7 +11,8 @@ import logo from "./logo.svg";
 import { Section } from "./Section";
 import { Scan } from "./Scan";
 import { Create } from "./Create";
-import Send from './Send';
+// import Send from './Send';
+import SendSignalHub from './SendSignalHub';
 
 export const password = new Password();
 
@@ -99,7 +100,7 @@ export default class Root extends React.Component {
           </Route>
           <Route path="/send">
             <Section>
-              <Send />
+              <SendSignalHub />
             </Section>
           </Route>
         </Switch>
