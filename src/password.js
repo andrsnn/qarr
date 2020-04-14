@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 export default class Password {
   _pattern = /[a-zA-Z0-9_\-\+\.]/;
   _getRandomByte = () => {
