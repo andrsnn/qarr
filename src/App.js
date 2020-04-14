@@ -9,7 +9,7 @@ import logo from "./logo.svg";
 import { Section } from "./Section";
 import { Scan } from "./Scan";
 import { Create } from "./Create";
-import SendSignalHub from './SendSignalHub';
+import Send from './Send';
 
 export const password = new Password();
 
@@ -83,7 +83,7 @@ export default class Root extends React.Component {
           </Route>
           <Route path="/send">
             <Section>
-              <SendSignalHub />
+              <Send />
             </Section>
           </Route>
         </Switch>
