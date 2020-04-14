@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React from "react";
 
 import { v4 as uuid } from "uuid";
@@ -9,11 +10,9 @@ import ChatWindow from "./react-chat-window/components/ChatWindow";
 import WebRTC from "./webrtc";
 
 var signalhub = require("signalhub");
-const info = deviceInfo.get()
+const info = deviceInfo.get();
 
-var hub = signalhub("qarr", [
-  "https://qarr.herokuapp.com/",
-]);
+var hub = signalhub("qarr", ["https://qarr.herokuapp.com/"]);
 
 function arrayBufferToBase64(buffer) {
   let binary = "";
@@ -112,11 +111,16 @@ export default class Send extends React.Component {
       }
     };
     this.webrtc.onOpen = () => {
-      this.sendWebRtc({
-        clientId: this.state.clientId,
-        event: "complete",
-        message: "Web RTC handshake complete.",
-      });
+      this.setState({
+        webrtcConnected: true
+      }, () => {
+        this.sendWebRtc({
+          clientId: this.state.clientId,
+          event: "complete",
+          message: "Web RTC handshake complete.",
+        });
+      })
+      
     };
     this.webrtc.onClose = () => {
       window.location.replace(window.location.href);
@@ -143,10 +147,10 @@ export default class Send extends React.Component {
       const parsedData = JSON.parse(atob(query.data));
       const link = window.location.href + `?data=${query.data}`;
 
-    const key = base64ToArrayBuffer(parsedData.key);
+      const key = base64ToArrayBuffer(parsedData.key);
 
       crypto.subtle
-        .importKey("raw", key, {name: 'AES-GCM'}, true, [
+        .importKey("raw", key, { name: "AES-GCM" }, true, [
           "encrypt",
           "decrypt",
         ])
@@ -260,7 +264,6 @@ export default class Send extends React.Component {
     const sub = hub.subscribe(this.state.channelId);
 
     sub.on("data", async (message) => {
-
       if (message) {
         if (message.event === "join") {
           if (message.clientId === this.state.clientId) {
@@ -404,7 +407,7 @@ export default class Send extends React.Component {
       .then((key) => {
         this.cryptoKey = key;
         crypto.subtle.exportKey("raw", key).then((rawKey) => {
-            const outKey = arrayBufferToBase64(rawKey);
+          const outKey = arrayBufferToBase64(rawKey);
           const channelId = uuid();
           const value = btoa(
             JSON.stringify({
@@ -422,6 +425,7 @@ export default class Send extends React.Component {
               // client id should include info about the device
               clientId: uuid(),
               connecting: true,
+              hasInitiated: true,
               peers: [info],
               messages: [
                 {
@@ -442,8 +446,8 @@ export default class Send extends React.Component {
                             value={value}
                             style={{
                               maxWidth: "225px",
-                              maxHeight: '225px',
-                              width: "100%"
+                              maxHeight: "225px",
+                              width: "100%",
                             }}
                           />
                         </div>
@@ -456,7 +460,10 @@ export default class Send extends React.Component {
                               width: "calc(100%)",
                             }}
                           >
-                            <div className="control" style={{ width: "320px", marginLeft: 'auto' }}>
+                            <div
+                              className="control"
+                              style={{ width: "320px", marginLeft: "auto" }}
+                            >
                               <input
                                 className="input"
                                 type="text"
@@ -464,7 +471,10 @@ export default class Send extends React.Component {
                                 defaultValue={link}
                               />
                             </div>
-                            <div className="control" style={{marginRight: 'auto'}}>
+                            <div
+                              className="control"
+                              style={{ marginRight: "auto" }}
+                            >
                               {/* <a className="button is-info">
                                           Copy
                                       </a> */}
@@ -504,6 +514,21 @@ export default class Send extends React.Component {
   handleUserChat = (e) => {
     const messages = this.state.messages;
 
+    if (!this.state.webrtcConnected) {
+
+      messages.push({
+        author: 'narrator',
+        type: 'text',
+        data: {
+          text: 'Not connected. Please click "connect" to start the chat...'
+        }
+      })
+
+      return this.setState({
+        messages
+      })
+    }
+
     messages.push(e);
 
     this.setState(
@@ -520,60 +545,123 @@ export default class Send extends React.Component {
     );
   };
 
+  howSecure = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const messages = this.state.messages;
+
+    messages.push({
+      author: 'narrator',
+      type: 'text',
+      data: {
+        text: <div>
+          <p><a href="" onClick={e => e.preventDefault()}>How is this secure?</a></p>
+          <br/>
+          <ul>
+            <li>A signaling server is initially used to establish an encrypted WebRTC tunnel, after which communications are sent directly to the peer.</li>
+            <br/>
+            <li>An encryption key unknown to the server is exchanged in the shared QR code or link.  When a message is sent, the message is encrypted with this symmetric key using AES-GCM.</li>
+            <br/>
+            <li>The key is generated locally, on your browser, and never leaves your machine.  The encryption process uses native browser crypto implementations (crypto.subtle).</li>
+          </ul>
+        </div>
+      }
+    });
+    
+    this.setState({
+      messages
+    })
+  }
+
+  onFilesSelected = () => {
+    const messages = this.state.messages;
+
+    messages.push({
+      author: 'narrator',
+      type: 'text',
+      data: {
+        text: 'Not yet implemented...'
+      }
+    });
+    
+    this.setState({
+      messages
+    })
+  }
+
   render() {
-    if (this.state.peers.length) {
-      return (
-        <ChatWindow
-          agentProfile={{
-            teamName: "Secure Chat",
-            imageUrl: "",
-          }}
-          onMessageWasSent={() => {}}
-          onClose={() => {}}
-          onUserInputSubmit={this.handleUserChat}
-          messageList={this.state.messages}
-          showEmoji
-        />
-      );
-    }
-    return (
-      <div
-        className="columns notification is-success is-light"
-        style={{ backgroundColor: "#75776354", paddingRight: "24px" }}
-      >
-        <div className="column" style={{ textAlign: "center" }}>
-          <div>
-            {!this.state.value && (
-              <div>
-                <div
-                  style={{
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    width: "100%",
-                    height: "400px",
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                  }}
-                >
-                  <div className="buttons">
-                    <button
-                      className="button is-link"
-                      onClick={this.handleConnect}
+    
+    const messages = [
+      
+      {
+        author: 'narrator',
+        type: 'text',
+        data: {
+          text: (
+            <div>
+              <p>Start an encrypted peer to peer chat by clicking connect below.  <a href="" onClick={this.howSecure}>How is this secure?</a></p>
+            </div>
+          )
+        }
+      },
+      {
+        author: "narrator",
+        type: "text",
+        data: {
+          text: (
+            <div
+              className="columns notification is-success is-light"
+              style={{ backgroundColor: "#75776354", paddingRight: "24px" }}
+            >
+              <div className="column" style={{ textAlign: "center" }}>
+                <div>
+                  <div>
+                    <div
                       style={{
-                        fontSize: "20px",
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        width: "100%",
+                        height: "400px",
                         marginLeft: "auto",
                         marginRight: "auto",
-                        marginTop: "175px",
                       }}
                     >
-                      Connect...
-                    </button>
+                      <div className="buttons">
+                        <button
+                          className="button is-link"
+                          disabled={this.state.hasInitiated}
+                          onClick={this.handleConnect}
+                          style={{
+                            fontSize: "20px",
+                            marginLeft: "auto",
+                            marginRight: "auto",
+                            marginTop: "175px",
+                          }}
+                        >
+                          Connect...
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
+            </div>
+          ),
+        },
+      },
+      ...this.state.messages];
+    return (
+      <ChatWindow
+        agentProfile={{
+          teamName: "Secure Chat",
+          imageUrl: "",
+        }}
+        onMessageWasSent={() => {}}
+        onClose={() => {}}
+        onUserInputSubmit={this.handleUserChat}
+        onFilesSelected={this.onFilesSelected}
+        messageList={messages}
+        showEmoji
+      />
     );
   }
 }
