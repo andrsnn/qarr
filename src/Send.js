@@ -10,7 +10,6 @@ import { CopyButton } from "./CopyButton";
 import ChatWindow from "./react-chat-window/components/ChatWindow";
 import WebRTC from "./webrtc";
 
-var signalhub = require("signalhub");
 const info = deviceInfo.get();
 const isSafari = info.browser.name.includes("Safari");
 
@@ -94,8 +93,7 @@ export default class Send extends React.Component {
     messages: [],
     isInitiator: true,
   };
-  constructor(props) {
-    super(props);
+  initWebRtc = () => {
     this.webrtc = new WebRTC();
     this.webrtc.onMessage = async (msg) => {
       if (isSafari && this.interval) {
@@ -135,7 +133,7 @@ export default class Send extends React.Component {
     this.webrtc.onClose = () => {
       window.location.replace(window.location.href);
     };
-  }
+  };
 
   parseQueryStringParams = () => {
     const params = {};
@@ -294,7 +292,7 @@ export default class Send extends React.Component {
         });
 
         socket.on("open", (msg) => {
-          console.log('open', msg);
+          console.log("open", msg);
           this.setState(
             {
               connecting: false,
@@ -307,7 +305,7 @@ export default class Send extends React.Component {
         });
 
         socket.on("data", (msg) => {
-          console.log('data', msg);
+          console.log("data", msg);
           const message = msg.data;
           if (message) {
             if (message.event === "join") {
@@ -429,6 +427,7 @@ export default class Send extends React.Component {
   };
 
   startWebRtc = async () => {
+    this.initWebRtc();
     if (this.state.isInitiator) {
       const offer = await this.webrtc.create();
 
@@ -437,7 +436,10 @@ export default class Send extends React.Component {
   };
 
   send = (msg) => {
-    this.state.socket.emit("data", {channelId: this.state.channelId, data: msg});
+    this.state.socket.emit("data", {
+      channelId: this.state.channelId,
+      data: msg,
+    });
   };
 
   handleConnect = () => {
