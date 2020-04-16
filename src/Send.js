@@ -12,11 +12,11 @@ import WebRTC from "./webrtc";
 
 var signalhub = require("signalhub");
 const info = deviceInfo.get();
-const isSafari = info.browser.name.includes('Safari');
+const isSafari = info.browser.name.includes("Safari");
 
 // var hub = signalhub("qarr", ["https://qarr.herokuapp.com/"]);
 
-var io = require('socket.io-client');
+var io = require("socket.io-client");
 
 function arrayBufferToBase64(buffer) {
   let binary = "";
@@ -119,16 +119,18 @@ export default class Send extends React.Component {
       }
     };
     this.webrtc.onOpen = () => {
-      this.setState({
-        webrtcConnected: true
-      }, () => {
-        this.sendWebRtc({
-          clientId: this.state.clientId,
-          event: "complete",
-          message: "Web RTC handshake complete.",
-        });
-      })
-      
+      this.setState(
+        {
+          webrtcConnected: true,
+        },
+        () => {
+          this.sendWebRtc({
+            clientId: this.state.clientId,
+            event: "complete",
+            message: "Web RTC handshake complete.",
+          });
+        }
+      );
     };
     this.webrtc.onClose = () => {
       window.location.replace(window.location.href);
@@ -194,8 +196,14 @@ export default class Send extends React.Component {
                             value={query.data}
                             style={{
                               width: "100%",
-                              maxWidth: (document.documentElement.clientWidth <= 500 ? "225px" : '400px'),
-                              maxHeight: (document.documentElement.clientWidth <= 500 ? "225px" : '400px')
+                              maxWidth:
+                                document.documentElement.clientWidth <= 500
+                                  ? "225px"
+                                  : "400px",
+                              maxHeight:
+                                document.documentElement.clientWidth <= 500
+                                  ? "225px"
+                                  : "400px",
                             }}
                           />
                         </div>
@@ -205,7 +213,7 @@ export default class Send extends React.Component {
                             style={{
                               marginLeft: "auto",
                               marginRight: "auto",
-                              width: "100%"
+                              width: "100%",
                             }}
                           >
                             <div className="control" style={{ width: "320px" }}>
@@ -269,143 +277,152 @@ export default class Send extends React.Component {
       return;
     }
 
-    const url = window.location.hostname.includes('localhost')
-      ? 'http://localhost:3001/'
-      : 'https://warm-depths-81051.herokuapp.com/';
+    const url = window.location.hostname.includes("localhost")
+      ? "http://localhost:3001/"
+      : "https://warm-depths-81051.herokuapp.com/";
 
     const socket = io.connect(url);
 
-    this.setState({
-      socket,
-      subscribed: true
-    }, () => {
-      socket.on('connect', () => {
-        socket.emit('join-channel', this.state.channelId);
-      });
-  
-      socket.on('open', () => {
-        this.setState(
-          {
-            connecting: false,
-            connected: true,
-          },
-          () => {
-            this.send({ event: "join", clientId: this.state.clientId, info });
-          }
-        );
-      });
-  
-      socket.on('data', (message) => {
-        if (message) {
-          if (message.event === "join") {
-            if (message.clientId === this.state.clientId) {
-              const messages = this.state.messages;
-  
-              messages.push({
-                author: "Narrator",
-                type: "text",
-                data: {
-                  text: `You connected to the channel. ${this.getConnectInfoStr(
-                    info
-                  )}.  Waiting for peers...`,
-                },
-              });
-              this.setState({
-                messages,
-              });
-            } else {
-              //   clearInterval(this.state.interval);
-              const peers = this.state.peers;
-  
-              peers.push({
-                clientId: message.clientId,
-                info: message.info,
-              });
-  
-              const messages = this.state.messages;
-  
-              messages.push({
-                author: "Narrator",
-                type: "text",
-                data: {
-                  text: `A peer has connected ${this.getConnectInfoStr(
-                    message.info
-                  )}.  Establishing web rtc tunnel...`,
-                },
-              });
-              // add peer
-              this.setState(
-                {
-                  isConnectedToPeer: true,
-                  peers,
-                  messages,
-                  interval: null,
-                },
-                this.startWebRtc
-              );
+    this.setState(
+      {
+        socket,
+        subscribed: true,
+      },
+      () => {
+        socket.on("connect", () => {
+          socket.emit("join-channel", this.state.channelId);
+        });
+
+        socket.on("open", () => {
+          this.setState(
+            {
+              connecting: false,
+              connected: true,
+            },
+            () => {
+              this.send({ event: "join", clientId: this.state.clientId, info });
             }
-          }
-          if (message.clientId !== this.state.clientId) {
-            // total safari hack because it doesn't support the onopen event for some bizarre reason
-            if (message.event === 'offer' || message.event === 'answer' && isSafari) {
-              this.interval = setInterval(() => {
+          );
+        });
+
+        socket.on("data", (message) => {
+          if (message) {
+            if (message.event === "join") {
+              if (message.clientId === this.state.clientId) {
+                const messages = this.state.messages;
+
+                messages.push({
+                  author: "Narrator",
+                  type: "text",
+                  data: {
+                    text: `You connected to the channel. ${this.getConnectInfoStr(
+                      info
+                    )}.  Waiting for peers...`,
+                  },
+                });
                 this.setState({
-                  webrtcConnected: true
-                }, () => {
-                  this.webrtc.isOpen = true;
-                  this.sendWebRtc({
-                    event: "message",
-                    message: 'Safari establish connection',
-                    clientId: this.state.clientId
-                  })
-                })
-              }, 7000);
+                  messages,
+                });
+              } else {
+                //   clearInterval(this.state.interval);
+                const peers = this.state.peers;
+
+                peers.push({
+                  clientId: message.clientId,
+                  info: message.info,
+                });
+
+                const messages = this.state.messages;
+
+                messages.push({
+                  author: "Narrator",
+                  type: "text",
+                  data: {
+                    text: `A peer has connected ${this.getConnectInfoStr(
+                      message.info
+                    )}.  Establishing web rtc tunnel...`,
+                  },
+                });
+                // add peer
+                this.setState(
+                  {
+                    isConnectedToPeer: true,
+                    peers,
+                    messages,
+                    interval: null,
+                  },
+                  this.startWebRtc
+                );
+              }
             }
-  
-            if (message.event === "offer") {
-              const messages = this.state.messages;
-              messages.push({
-                author: "Narrator",
-                type: "text",
-                data: {
-                  text: `Offer received...`,
-                },
-              });
-              this.setState(
-                {
-                  messages,
-                },
-                async () => {
-                  const answer = await this.webrtc.join(message.offer);
-                  this.send({
-                    event: "answer",
-                    answer,
-                    clientId: this.state.clientId,
-                  });
-                }
-              );
-            } else if (message.event === "answer") {
-              const messages = this.state.messages;
-              messages.push({
-                author: "Narrator",
-                type: "text",
-                data: {
-                  text: `Answer received...`,
-                },
-              });
-              this.setState(
-                {
-                  messages,
-                },
-                async () => {
-                  this.webrtc.answer(message.answer);
-                }
-              );
+            if (message.clientId !== this.state.clientId) {
+              // total safari hack because it doesn't support the onopen event for some bizarre reason
+              if (
+                message.event === "offer" ||
+                (message.event === "answer" && isSafari)
+              ) {
+                this.interval = setInterval(() => {
+                  this.setState(
+                    {
+                      webrtcConnected: true,
+                    },
+                    () => {
+                      this.webrtc.isOpen = true;
+                      this.sendWebRtc({
+                        event: "message",
+                        message: "Safari establish connection",
+                        clientId: this.state.clientId,
+                      });
+                    }
+                  );
+                }, 7000);
+              }
+
+              if (message.event === "offer") {
+                const messages = this.state.messages;
+                messages.push({
+                  author: "Narrator",
+                  type: "text",
+                  data: {
+                    text: `Offer received...`,
+                  },
+                });
+                this.setState(
+                  {
+                    messages,
+                  },
+                  async () => {
+                    const answer = await this.webrtc.join(message.offer);
+                    this.send({
+                      event: "answer",
+                      answer,
+                      clientId: this.state.clientId,
+                    });
+                  }
+                );
+              } else if (message.event === "answer") {
+                const messages = this.state.messages;
+                messages.push({
+                  author: "Narrator",
+                  type: "text",
+                  data: {
+                    text: `Answer received...`,
+                  },
+                });
+                this.setState(
+                  {
+                    messages,
+                  },
+                  async () => {
+                    this.webrtc.answer(message.answer);
+                  }
+                );
+              }
             }
           }
-        }
-      });
-    })
+        });
+      }
+    );
   };
 
   startWebRtc = async () => {
@@ -417,7 +434,7 @@ export default class Send extends React.Component {
   };
 
   send = (msg) => {
-    this.state.socket.emit('data', msg);
+    this.state.socket.emit("data", msg);
   };
 
   handleConnect = () => {
@@ -471,8 +488,14 @@ export default class Send extends React.Component {
                           <QRCodeComp
                             value={value}
                             style={{
-                              maxWidth: (document.documentElement.clientWidth <= 500 ? "225px" : '400px'),
-                              maxHeight: (document.documentElement.clientWidth <= 500 ? "225px" : '400px'),
+                              maxWidth:
+                                document.documentElement.clientWidth <= 500
+                                  ? "225px"
+                                  : "400px",
+                              maxHeight:
+                                document.documentElement.clientWidth <= 500
+                                  ? "225px"
+                                  : "400px",
                               width: "100%",
                             }}
                           />
@@ -483,7 +506,7 @@ export default class Send extends React.Component {
                             style={{
                               marginLeft: "auto",
                               marginRight: "auto",
-                              width: "100%"
+                              width: "100%",
                             }}
                           >
                             <div
@@ -541,18 +564,17 @@ export default class Send extends React.Component {
     const messages = this.state.messages;
 
     if (!this.state.webrtcConnected) {
-
       messages.push({
-        author: 'narrator',
-        type: 'text',
+        author: "narrator",
+        type: "text",
         data: {
-          text: 'Not connected. Please click "connect" to start the chat...'
-        }
-      })
+          text: 'Not connected. Please click "connect" to start the chat...',
+        },
+      });
 
       return this.setState({
-        messages
-      })
+        messages,
+      });
     }
 
     messages.push(e);
@@ -577,58 +599,79 @@ export default class Send extends React.Component {
     const messages = this.state.messages;
 
     messages.push({
-      author: 'narrator',
-      type: 'text',
+      author: "narrator",
+      type: "text",
       data: {
-        text: <div>
-          <p><a href="" onClick={e => e.preventDefault()}>How is this secure?</a></p>
-          <br/>
-          <ul>
-            <li>A signaling server is initially used to establish an encrypted WebRTC tunnel, after which communications are sent directly to the peer.</li>
-            <br/>
-            <li>An encryption key unknown to the server is exchanged in the shared QR code or link.  When a message is sent, the message is encrypted with this symmetric key using AES-GCM.</li>
-            <br/>
-            <li>The key is generated locally, on your browser, and never leaves your machine.  The encryption process uses native browser crypto implementations (crypto.subtle).</li>
-          </ul>
-        </div>
-      }
+        text: (
+          <div>
+            <p>
+              <a href="" onClick={(e) => e.preventDefault()}>
+                How is this secure?
+              </a>
+            </p>
+            <br />
+            <ul>
+              <li>
+                A signaling server is initially used to establish an encrypted
+                WebRTC tunnel, after which communications are sent directly to
+                the peer.
+              </li>
+              <br />
+              <li>
+                An encryption key unknown to the server is exchanged in the
+                shared QR code or link. When a message is sent, the message is
+                encrypted with this symmetric key using AES-GCM.
+              </li>
+              <br />
+              <li>
+                The key is generated locally, on your browser, and never leaves
+                your machine. The encryption process uses native browser crypto
+                implementations (crypto.subtle).
+              </li>
+            </ul>
+          </div>
+        ),
+      },
     });
-    
+
     this.setState({
-      messages
-    })
-  }
+      messages,
+    });
+  };
 
   onFilesSelected = () => {
     const messages = this.state.messages;
 
     messages.push({
-      author: 'narrator',
-      type: 'text',
+      author: "narrator",
+      type: "text",
       data: {
-        text: 'Not yet implemented...'
-      }
+        text: "Not yet implemented...",
+      },
     });
-    
+
     this.setState({
-      messages
-    })
-  }
+      messages,
+    });
+  };
 
   render() {
-    
     const messages = [
-      
       {
-        author: 'narrator',
-        type: 'text',
+        author: "narrator",
+        type: "text",
         data: {
           text: (
             <div>
-              <p>Start an encrypted peer to peer chat by clicking connect below.  <a href="" onClick={this.howSecure}>How is this secure?</a></p>
+              <p>
+                Start an encrypted peer to peer chat by clicking connect below.{" "}
+                <a href="" onClick={this.howSecure}>
+                  How is this secure?
+                </a>
+              </p>
             </div>
-          )
-        }
+          ),
+        },
       },
       {
         author: "narrator",
@@ -674,7 +717,8 @@ export default class Send extends React.Component {
           ),
         },
       },
-      ...this.state.messages];
+      ...this.state.messages,
+    ];
     return (
       <ChatWindow
         agentProfile={{
