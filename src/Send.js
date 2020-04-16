@@ -293,8 +293,8 @@ export default class Send extends React.Component {
           socket.emit("join-channel", this.state.channelId);
         });
 
-        socket.on("open", () => {
-          console.log('open');
+        socket.on("open", (msg) => {
+          console.log('open', msg);
           this.setState(
             {
               connecting: false,
@@ -306,8 +306,9 @@ export default class Send extends React.Component {
           );
         });
 
-        socket.on("data", (message) => {
-          console.log('data', message);
+        socket.on("data", (msg) => {
+          console.log('data', msg);
+          const message = msg.data;
           if (message) {
             if (message.event === "join") {
               if (message.clientId === this.state.clientId) {
@@ -436,7 +437,7 @@ export default class Send extends React.Component {
   };
 
   send = (msg) => {
-    this.state.socket.emit("data", msg);
+    this.state.socket.emit("data", {channelId: this.state.channelId, data: msg});
   };
 
   handleConnect = () => {
