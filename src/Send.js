@@ -304,9 +304,9 @@ export default class Send extends React.Component {
           );
         });
 
-        socket.on("data", (msg) => {
+        socket.on("data", async (msg) => {
           console.log("data", msg);
-          const message = msg.data;
+          const message = await decrypt(msg.data, this.cryptoKey);
           if (message) {
             if (message.event === "join") {
               if (message.clientId === this.state.clientId) {
@@ -435,7 +435,8 @@ export default class Send extends React.Component {
     }
   };
 
-  send = (msg) => {
+  send = async (msg) => {
+    msg = await encrypt(msg, this.cryptoKey);
     this.state.socket.emit("data", {
       channelId: this.state.channelId,
       data: msg,
