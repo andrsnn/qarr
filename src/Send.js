@@ -294,6 +294,7 @@ export default class Send extends React.Component {
         });
 
         socket.on("open", () => {
+          console.log('open');
           this.setState(
             {
               connecting: false,
@@ -306,6 +307,7 @@ export default class Send extends React.Component {
         });
 
         socket.on("data", (message) => {
+          console.log('data', message);
           if (message) {
             if (message.event === "join") {
               if (message.clientId === this.state.clientId) {
