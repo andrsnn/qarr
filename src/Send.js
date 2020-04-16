@@ -14,7 +14,9 @@ var signalhub = require("signalhub");
 const info = deviceInfo.get();
 const isSafari = info.browser.name.includes('Safari');
 
-var hub = signalhub("qarr", ["https://qarr.herokuapp.com/"]);
+// var hub = signalhub("qarr", ["https://qarr.herokuapp.com/"]);
+
+var io = require('socket.io-client');
 
 function arrayBufferToBase64(buffer) {
   let binary = "";
@@ -267,141 +269,143 @@ export default class Send extends React.Component {
       return;
     }
 
-    const sub = hub.subscribe(this.state.channelId);
+    const url = window.location.hostname.includes('localhost')
+      ? 'http://localhost:3001/'
+      : 'https://warm-depths-81051.herokuapp.com/';
 
-    sub.on("data", async (message) => {
-      if (message) {
-        if (message.event === "join") {
-          if (message.clientId === this.state.clientId) {
-            const messages = this.state.messages;
-
-            messages.push({
-              author: "Narrator",
-              type: "text",
-              data: {
-                text: `You connected to the channel. ${this.getConnectInfoStr(
-                  info
-                )}.  Waiting for peers...`,
-              },
-            });
-            this.setState({
-              messages,
-            });
-          } else {
-            //   clearInterval(this.state.interval);
-            const peers = this.state.peers;
-
-            peers.push({
-              clientId: message.clientId,
-              info: message.info,
-            });
-
-            const messages = this.state.messages;
-
-            messages.push({
-              author: "Narrator",
-              type: "text",
-              data: {
-                text: `A peer has connected ${this.getConnectInfoStr(
-                  message.info
-                )}.  Establishing web rtc tunnel...`,
-              },
-            });
-            // add peer
-            this.setState(
-              {
-                isConnectedToPeer: true,
-                peers,
-                messages,
-                interval: null,
-              },
-              this.startWebRtc
-            );
-          }
-        }
-        if (message.clientId !== this.state.clientId) {
-          // total safari hack because it doesn't support the onopen event for some bizarre reason
-          if (message.event === 'offer' || message.event === 'answer' && isSafari) {
-            this.interval = setInterval(() => {
-              this.setState({
-                webrtcConnected: true
-              }, () => {
-                this.webrtc.isOpen = true;
-                this.sendWebRtc({
-                  event: "message",
-                  message: 'Safari establish connection',
-                  clientId: this.state.clientId
-                })
-              })
-            }, 7000);
-          }
-
-          if (message.event === "offer") {
-            const messages = this.state.messages;
-            messages.push({
-              author: "Narrator",
-              type: "text",
-              data: {
-                text: `Offer received...`,
-              },
-            });
-            this.setState(
-              {
-                messages,
-              },
-              async () => {
-                const answer = await this.webrtc.join(message.offer);
-                this.send({
-                  event: "answer",
-                  answer,
-                  clientId: this.state.clientId,
-                });
-              }
-            );
-          } else if (message.event === "answer") {
-            const messages = this.state.messages;
-            messages.push({
-              author: "Narrator",
-              type: "text",
-              data: {
-                text: `Answer received...`,
-              },
-            });
-            this.setState(
-              {
-                messages,
-              },
-              async () => {
-                this.webrtc.answer(message.answer);
-              }
-            );
-          }
-        }
-      }
-    });
-
-    sub.on("open", () => {
-      this.setState(
-        {
-          connecting: false,
-          connected: true,
-        },
-        () => {
-          this.send({ event: "join", clientId: this.state.clientId, info });
-        }
-      );
-    });
-
-    // const interval = setInterval(() => {
-    //     if (this.state.connected && !this.state.isConnectedToPeer) {
-    //         this.send({ event: "join", clientId: this.state.clientId, info });
-    //     }
-    // }, 5000);
+    const socket = io.connect(url);
 
     this.setState({
-      subscribed: true,
-      //   interval
-    });
+      socket,
+      subscribed: true
+    }, () => {
+      socket.on('connect', () => {
+        socket.emit('join-channel', this.state.channelId);
+      });
+  
+      socket.on('open', () => {
+        this.setState(
+          {
+            connecting: false,
+            connected: true,
+          },
+          () => {
+            this.send({ event: "join", clientId: this.state.clientId, info });
+          }
+        );
+      });
+  
+      socket.on('data', (message) => {
+        if (message) {
+          if (message.event === "join") {
+            if (message.clientId === this.state.clientId) {
+              const messages = this.state.messages;
+  
+              messages.push({
+                author: "Narrator",
+                type: "text",
+                data: {
+                  text: `You connected to the channel. ${this.getConnectInfoStr(
+                    info
+                  )}.  Waiting for peers...`,
+                },
+              });
+              this.setState({
+                messages,
+              });
+            } else {
+              //   clearInterval(this.state.interval);
+              const peers = this.state.peers;
+  
+              peers.push({
+                clientId: message.clientId,
+                info: message.info,
+              });
+  
+              const messages = this.state.messages;
+  
+              messages.push({
+                author: "Narrator",
+                type: "text",
+                data: {
+                  text: `A peer has connected ${this.getConnectInfoStr(
+                    message.info
+                  )}.  Establishing web rtc tunnel...`,
+                },
+              });
+              // add peer
+              this.setState(
+                {
+                  isConnectedToPeer: true,
+                  peers,
+                  messages,
+                  interval: null,
+                },
+                this.startWebRtc
+              );
+            }
+          }
+          if (message.clientId !== this.state.clientId) {
+            // total safari hack because it doesn't support the onopen event for some bizarre reason
+            if (message.event === 'offer' || message.event === 'answer' && isSafari) {
+              this.interval = setInterval(() => {
+                this.setState({
+                  webrtcConnected: true
+                }, () => {
+                  this.webrtc.isOpen = true;
+                  this.sendWebRtc({
+                    event: "message",
+                    message: 'Safari establish connection',
+                    clientId: this.state.clientId
+                  })
+                })
+              }, 7000);
+            }
+  
+            if (message.event === "offer") {
+              const messages = this.state.messages;
+              messages.push({
+                author: "Narrator",
+                type: "text",
+                data: {
+                  text: `Offer received...`,
+                },
+              });
+              this.setState(
+                {
+                  messages,
+                },
+                async () => {
+                  const answer = await this.webrtc.join(message.offer);
+                  this.send({
+                    event: "answer",
+                    answer,
+                    clientId: this.state.clientId,
+                  });
+                }
+              );
+            } else if (message.event === "answer") {
+              const messages = this.state.messages;
+              messages.push({
+                author: "Narrator",
+                type: "text",
+                data: {
+                  text: `Answer received...`,
+                },
+              });
+              this.setState(
+                {
+                  messages,
+                },
+                async () => {
+                  this.webrtc.answer(message.answer);
+                }
+              );
+            }
+          }
+        }
+      });
+    })
   };
 
   startWebRtc = async () => {
@@ -413,7 +417,7 @@ export default class Send extends React.Component {
   };
 
   send = (msg) => {
-    hub.broadcast(this.state.channelId, msg);
+    this.state.socket.emit('data', msg);
   };
 
   handleConnect = () => {
