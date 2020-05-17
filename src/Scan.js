@@ -6,12 +6,12 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import Timer from "./Timer";
 import { CopyButton } from "./CopyButton";
 export class Scan extends React.Component {
-  timer = new Timer({ count: 60 });
+  timer = new Timer({ count: 600 });
   state = {
     result: null,
     isLoading: false,
     shouldDisplayResult: false,
-    countdown: 60,
+    countdown: 600,
   };
   componentDidMount() {
     this.timer.tick = (count) => {
@@ -69,7 +69,7 @@ export class Scan extends React.Component {
     this.setState({
       result: null,
       shouldDisplayResult: false,
-      countdown: 60,
+      countdown: 600,
     });
   };
   render() {
