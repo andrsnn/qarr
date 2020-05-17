@@ -86,7 +86,7 @@ export class Create extends React.Component {
       <div className="column is-12">
         <div className="notification is-success is-light" style={{ backgroundColor: "#75776354" }}>
           <div style={{ textAlign: "center" }}>
-            <QRCodeComp value={this.state.text} />
+            <QRCodeComp value={this.state.text || 'Type to create...'} />
           </div>
 
           <br />
