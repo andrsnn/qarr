@@ -29,7 +29,7 @@ export class QRCodeComp extends React.Component {
     , this.props.style || {});
 
     if (!this.props.value) {
-      return this.props.defaultComponent || '';
+      return this.props.defaultComponent || 'Type to create...';
     }
     return (<div>
       <canvas id="canvas" ref={this.canvas} style={style}></canvas>

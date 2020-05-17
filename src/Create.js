@@ -8,10 +8,10 @@ import { QRCodeComp } from "./QRCodeComp";
 import { Modal } from "./Modal";
 import { password } from "./App";
 export class Create extends React.Component {
-  timer = new Timer({ count: 60 });
+  timer = new Timer({ count: 600 });
   state = {
-    text: "Type to create...",
-    countdown: 60,
+    text: "",
+    countdown: 600,
     displayWifiModal: false
   };
   componentDidMount() {
@@ -23,7 +23,7 @@ export class Create extends React.Component {
     this.timer.end = () => {
       this.setState({
         text: "",
-        countdown: 60,
+        countdown: 600,
       });
     };
   }
@@ -33,7 +33,7 @@ export class Create extends React.Component {
   handleOnChange = (e) => {
     this.setState({
       text: e.target.value,
-      countdown: 60,
+      countdown: 600,
     }, () => {
       this.timer.start();
       this.timer.reset();
@@ -57,7 +57,7 @@ export class Create extends React.Component {
     const wifiStr = `WIFI:T:WPA;S:${name};P:${password};${hidden ? 'true' : ''};`;
     this.setState({
       text: wifiStr,
-      countdown: 60,
+      countdown: 600,
       displayWifiModal: false
     }, () => {
       this.timer.start();
@@ -74,7 +74,7 @@ export class Create extends React.Component {
     var rnd = password.generate(32);
     this.setState({
       text: rnd,
-      countdown: 60
+      countdown: 600
     }, () => {
       this.timer.start();
       this.timer.reset();
