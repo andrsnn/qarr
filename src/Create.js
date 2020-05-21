@@ -12,6 +12,7 @@ export class Create extends React.Component {
   state = {
     text: "",
     countdown: 600,
+    countingDown: true,
     displayWifiModal: false
   };
   componentDidMount() {
@@ -80,6 +81,25 @@ export class Create extends React.Component {
       this.timer.reset();
     });
   };
+  stopOrResumeCountdown = () => {
+    if (!this.state.countingDown) {
+      this.timer.reset();
+      this.timer.start();
+      this.setState({
+        countdown: 600,
+        countingDown: true
+      });
+    }
+    else {
+      this.timer.reset();
+      this.timer.pause();
+      this.setState({
+        countdown: 600,
+        countingDown: false
+      });
+    }
+
+  };
   render() {
     return (<div className="columns is-mobile is-centered is-vcentered">
       {this.state.displayWifiModal && <Modal onSave={this.handleWifiDone} onCancel={this.handleCloseWifi} />}
@@ -94,7 +114,7 @@ export class Create extends React.Component {
           <div className="field">
             <div className="control">
               <textarea onChange={this.handleOnChange} style={{ color: "black", borderColor: "#757763" }} className="textarea is-success" placeholder="Type to create..." value={this.state.text}></textarea>
-              <div>{this.state.countdown}</div>
+              <div onClick={this.stopOrResumeCountdown}>{this.state.countdown}</div>
             </div>
           </div>
           <button onClick={this.handleDownload} className="button">

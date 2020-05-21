@@ -11,6 +11,7 @@ export class Scan extends React.Component {
     result: null,
     isLoading: false,
     shouldDisplayResult: false,
+    countingDown: true,
     countdown: 600,
   };
   componentDidMount() {
@@ -72,6 +73,31 @@ export class Scan extends React.Component {
       countdown: 600,
     });
   };
+  resetCountdown = () => {
+    this.timer.reset();
+    this.setState({
+      countdown: 600
+    });
+  };
+  stopOrResumeCountdown = () => {
+    if (!this.state.countingDown) {
+      this.timer.reset();
+      this.timer.start();
+      this.setState({
+        countdown: 600,
+        countingDown: true
+      });
+    }
+    else {
+      this.timer.reset();
+      this.timer.pause();
+      this.setState({
+        countdown: 600,
+        countingDown: false
+      });
+    }
+
+  };
   render() {
     if (this.state.shouldDisplayResult) {
       return (<div className="columns is-mobile is-centered is-vcentered">
@@ -81,7 +107,7 @@ export class Scan extends React.Component {
               {this.state.result}
             </pre>
             <br />
-            <div>{this.state.countdown}</div>
+            <div onClick={this.stopOrResumeCountdown}>{this.state.countdown}</div>
             <CopyButton target="#result" />
             <button className="button" onClick={this.handleGoBack}>
               <span className="icon is-small">
