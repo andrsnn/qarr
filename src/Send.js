@@ -260,8 +260,9 @@ export default class Send extends React.Component {
         });
 
         socket.on("data", async (msg) => {
+          console.log('encryptedMessage', msg);
           const message = await decrypt(msg.data, this.cryptoKey);
-          console.log('message', message);
+          console.log('decryptedMessage', message);
           if (message) {
             
             const messages = this.state.messages;
