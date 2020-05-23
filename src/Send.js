@@ -281,7 +281,7 @@ export default class Send extends React.Component {
                 author: "them",
                 type: "text",
                 data: {
-                  text: msg.message,
+                  text: message.message,
                 },
               });
               this.setState({
