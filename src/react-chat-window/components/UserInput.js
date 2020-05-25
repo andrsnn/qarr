@@ -105,25 +105,25 @@ class UserInput extends Component {
   )
 
   _renderSendOrFileIcon() {
-    if (this.state.inputHasText) {
-      return (
-        <div className="sc-user-input--button">
-          <SendIcon onClick={this._submitText.bind(this)} />
-        </div>
-      );
-    }
+    // if (this.state.inputHasText) {
     return (
       <div className="sc-user-input--button">
-        <FileIcon onClick={this._showFilePicker.bind(this)} />
-        <input
-          type="file"
-          name="files[]"
-          multiple
-          ref={(e) => { this._fileUploadButton = e; }}
-          onChange={this._onFilesSelected.bind(this)}
-        />
+        <SendIcon onClick={this._submitText.bind(this)} />
       </div>
     );
+    // }
+    // return (
+    //   <div className="sc-user-input--button">
+    //     <FileIcon onClick={this._showFilePicker.bind(this)} />
+    //     <input
+    //       type="file"
+    //       name="files[]"
+    //       multiple
+    //       ref={(e) => { this._fileUploadButton = e; }}
+    //       onChange={this._onFilesSelected.bind(this)}
+    //     />
+    //   </div>
+    // );
   }
 
   render() {
