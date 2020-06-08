@@ -206,28 +206,29 @@ export default class Send extends React.Component {
 
       const channelId = parsedData.channelId;
 
-      generateKeyPair().then(keyPair => {
-        // should this be attached to this.state?
-        this.keyPair = keyPair;
-  
-        this.setState(
-          {
-            value: query.data,
-            channelId,
-            clientId: uuid(),
-            connecting: true,
-            messages: this.getInitialNavigateToMessage({ query, link }),
-          },
-          () => {
-            window.history.pushState({}, document.title, "/send");
-  
-            this.handleJoin();
-          }
-        );
-      })
-      .catch(err => {
-        console.error(err);
-      });
+      generateKeyPair()
+        .then((keyPair) => {
+          // should this be attached to this.state?
+          this.keyPair = keyPair;
+
+          this.setState(
+            {
+              value: query.data,
+              channelId,
+              clientId: uuid(),
+              connecting: true,
+              messages: this.getInitialNavigateToMessage({ query, link }),
+            },
+            () => {
+              window.history.pushState({}, document.title, "/send");
+
+              this.handleJoin();
+            }
+          );
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
   }
 
@@ -274,7 +275,9 @@ export default class Send extends React.Component {
               connected: true,
             },
             async () => {
-              const publicKey = await extractPublicKey({ publicKey: this.keyPair.publicKey });
+              const publicKey = await extractPublicKey({
+                publicKey: this.keyPair.publicKey,
+              });
               this.state.socket.emit("data", {
                 channelId: this.state.channelId,
                 data: {
@@ -289,7 +292,7 @@ export default class Send extends React.Component {
         });
 
         socket.on("data", async (msg) => {
-          console.log('data', msg);
+          console.log("data", msg);
           if (msg && msg.data) {
             const messages = this.state.messages;
             if (msg.data.event === "join") {
@@ -340,7 +343,7 @@ export default class Send extends React.Component {
     );
   };
 
-  send = async ({ message = '' }) => {
+  send = async ({ message = "" }) => {
     const ciphertext = await encrypt({
       plaintext: message,
       peerPublicKey: this.state.peerPublicKey,
@@ -435,7 +438,7 @@ export default class Send extends React.Component {
     this.keyPair = keyPair;
 
     const channelId = uuid();
-    const value = btoa(JSON.stringify({ channelId, event: 'qarr-join-chat' }));
+    const value = btoa(JSON.stringify({ channelId, event: "qarr-join-chat" }));
     const link = window.location.href + `?data=${value}`;
 
     this.setState(
@@ -501,23 +504,24 @@ export default class Send extends React.Component {
             <br />
             <ul>
               <li>
-                A RSA asymmetric key pair is generated
-                upon initial navigation to the page.  When a peer joins the channel,
-                the peer sends their public key to the other party.  When a message is sent,
-                the message is then encrypted using the peer's public key, then is decrypted
-                by the peer with their private key using RSA-OAEP.
+                A channel ID is exchanged in the shared QR code or link. When a
+                peer navigates to the link, their browser connects to the web
+                socket server, and attaches to the same channel ID.  No cryptographic
+                information is exchanged in the QR code or link.
               </li>
-              <br/>
+              <br />
               <li>
-                The key pair is generated locally, on your browser, and never leaves
-                your machine. The encryption process uses native browser crypto
-                implementations (crypto.subtle).
+                A RSA asymmetric key pair is generated upon initial navigation
+                to the page. When a peer joins the channel, the peer sends their
+                public key to the other party. When a message is sent, the
+                message is then encrypted using the peer's public key, then is
+                decrypted by the peer with their private key using RSA-OAEP.
               </li>
-              <br/>
+              <br />
               <li>
-                A channel ID is exchanged in the shared QR code or link.  When a peer
-                navigates to the link, their browser connects to the web socket server,
-                and attaches to the same channel ID. 
+                The key pair is generated locally, on your browser, and never
+                leaves your machine. The encryption process uses native browser
+                crypto implementations (crypto.subtle).
               </li>
             </ul>
           </div>
