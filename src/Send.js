@@ -501,13 +501,17 @@ export default class Send extends React.Component {
             <br />
             <ul>
               <li>
-                An encryption key unknown to the server is exchanged in the
-                shared QR code or link. When a message is sent, the message is
-                encrypted with this symmetric key using AES-GCM.
+                A channel ID is exchanged in the shared QR code or link.  When a peer
+                navigates to the link, their browser connects to the web socket server,
+                and attaches to the same channel ID. A RSA asymmetric key pair is generated
+                upon initial navigation to the page.  When a peer joins the channel,
+                the peer sends their public key to the other party.  When a message is sent,
+                the message is then encrypted using the peer's public key, then is decrypted
+                by the peer with their private key using RSA-OAEP.
               </li>
               <br />
               <li>
-                The key is generated locally, on your browser, and never leaves
+                The key pair is generated locally, on your browser, and never leaves
                 your machine. The encryption process uses native browser crypto
                 implementations (crypto.subtle).
               </li>
