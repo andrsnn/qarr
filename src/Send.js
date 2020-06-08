@@ -43,42 +43,66 @@ function arrayBufferToUtf16(buffer) {
   return binary;
 }
 
-async function encrypt(plaintext, cryptoKey) {
-  plaintext = btoa(JSON.stringify(plaintext));
-
-  let enc = new TextEncoder();
-  enc = enc.encode(plaintext);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-
-  const encrypted = await crypto.subtle.encrypt(
+async function encrypt({ plaintext, peerPublicKey }) {
+  const encodedPlaintext = base64ToArrayBuffer(btoa(plaintext));
+  const encryptedText = await window.crypto.subtle.encrypt(
     {
-      name: "AES-GCM",
-      iv: iv,
+      name: "RSA-OAEP",
     },
-    cryptoKey,
-    enc
+    peerPublicKey,
+    encodedPlaintext
   );
 
-  var ivB64 = arrayBufferToBase64(iv);
-  var cipherB64 = arrayBufferToBase64(encrypted);
-
-  return btoa(JSON.stringify({ iv: ivB64, cipher: cipherB64 }));
+  return arrayBufferToBase64(encryptedText);
 }
 
-async function decrypt(ciphertext, cryptoKey) {
-  const data = JSON.parse(atob(ciphertext));
-  const iv = base64ToArrayBuffer(data.iv);
-  const cipher = base64ToArrayBuffer(data.cipher);
+async function decrypt({ ciphertext, privateKey }) {
+  const ciphertextAsArrayBuf = base64ToArrayBuffer(ciphertext);
 
-  const decrypted = await crypto.subtle.decrypt(
+  const decryptedText = await window.crypto.subtle.decrypt(
     {
-      name: "AES-GCM",
-      iv,
+      name: "RSA-OAEP",
     },
-    cryptoKey,
-    cipher
+    privateKey,
+    ciphertextAsArrayBuf
   );
-  return JSON.parse(atob(arrayBufferToUtf16(decrypted)));
+  return arrayBufferToUtf16(decryptedText);
+}
+
+async function generateKeyPair() {
+  const keyPair = await crypto.subtle.generateKey(
+    {
+      name: "RSA-OAEP",
+      modulusLength: 4096,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
+    },
+    true,
+    ["encrypt", "decrypt"]
+  );
+  return keyPair;
+}
+
+async function extractPublicKey({ publicKey }) {
+  const jwkPublicKey = await crypto.subtle.exportKey("jwk", publicKey);
+
+  const encodedPublicKey = btoa(JSON.stringify(jwkPublicKey));
+
+  return encodedPublicKey;
+}
+
+async function importPeerPublicKey({ encodedPeerPublicKey }) {
+  const publicKey = await crypto.subtle.importKey(
+    "jwk",
+    JSON.parse(atob(encodedPeerPublicKey)),
+    {
+      name: "RSA-OAEP",
+      hash: { name: "SHA-256" },
+    },
+    false,
+    ["encrypt"]
+  );
+  return publicKey;
 }
 
 export default class Send extends React.Component {
@@ -104,110 +128,106 @@ export default class Send extends React.Component {
     return params;
   };
 
+  getInitialNavigateToMessage = ({ query, link }) => {
+    return [
+      {
+        author: "narrator",
+        type: "text",
+        data: {
+          text: `To establish a peer to peer chat, have a friend scan the following QR code or navigate to the below link.`,
+        },
+      },
+      {
+        author: "narrator",
+        type: "text",
+        data: {
+          text: (
+            <div>
+              <div style={{ textAlign: "center" }}>
+                <QRCodeComp
+                  value={query.data}
+                  style={{
+                    width: "100%",
+                    maxWidth:
+                      document.documentElement.clientWidth <= 500
+                        ? "225px"
+                        : "400px",
+                    maxHeight:
+                      document.documentElement.clientWidth <= 500
+                        ? "225px"
+                        : "400px",
+                  }}
+                />
+              </div>
+              <div>
+                <div
+                  className="field has-addons"
+                  style={{
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                    width: "100%",
+                  }}
+                >
+                  <div className="control" style={{ width: "320px" }}>
+                    <input
+                      className="input"
+                      type="text"
+                      id="joinLink"
+                      defaultValue={link}
+                    />
+                  </div>
+                  <div className="control">
+                    {/* <a className="button is-info">
+                                  Copy
+                              </a> */}
+                    <CopyButton className="is-link" target="#joinLink" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ),
+        },
+      },
+      {
+        author: "narrator",
+        type: "text",
+        data: {
+          text: `Please wait while we connect...`,
+        },
+      },
+    ];
+  };
+
   componentDidMount() {
     const query = this.parseQueryStringParams();
     if (query.data) {
       const parsedData = JSON.parse(atob(query.data));
       const link = window.location.href + `?data=${query.data}`;
 
-      const key = base64ToArrayBuffer(parsedData.key);
+      const channelId = parsedData.channelId;
 
-      crypto.subtle
-        .importKey("raw", key, { name: "AES-GCM" }, true, [
-          "encrypt",
-          "decrypt",
-        ])
-        .then((cryptoKey) => {
-          this.cryptoKey = cryptoKey;
-
-          this.setState(
-            {
-              key: parsedData.key,
-              isInitiator: false,
-              value: query.data,
-              channelId: parsedData.channelId,
-              // client id should include info about the device
-              clientId: uuid(),
-              connecting: true,
-              peers: [info],
-              messages: [
-                {
-                  author: "narrator",
-                  type: "text",
-                  data: {
-                    text: `To establish a peer to peer chat, have a friend scan the following QR code or navigate to the below link.`,
-                  },
-                },
-                {
-                  author: "narrator",
-                  type: "text",
-                  data: {
-                    text: (
-                      <div>
-                        <div style={{ textAlign: "center" }}>
-                          <QRCodeComp
-                            value={query.data}
-                            style={{
-                              width: "100%",
-                              maxWidth:
-                                document.documentElement.clientWidth <= 500
-                                  ? "225px"
-                                  : "400px",
-                              maxHeight:
-                                document.documentElement.clientWidth <= 500
-                                  ? "225px"
-                                  : "400px",
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <div
-                            className="field has-addons"
-                            style={{
-                              marginLeft: "auto",
-                              marginRight: "auto",
-                              width: "100%",
-                            }}
-                          >
-                            <div className="control" style={{ width: "320px" }}>
-                              <input
-                                className="input"
-                                type="text"
-                                id="joinLink"
-                                defaultValue={link}
-                              />
-                            </div>
-                            <div className="control">
-                              {/* <a className="button is-info">
-                                            Copy
-                                        </a> */}
-                              <CopyButton
-                                className="is-link"
-                                target="#joinLink"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  },
-                },
-                {
-                  author: "narrator",
-                  type: "text",
-                  data: {
-                    text: `Please wait while we connect...`,
-                  },
-                },
-              ],
-            },
-            () => {
-              window.history.pushState({}, document.title, "/send");
-
-              this.handleJoin();
-            }
-          );
-        });
+      generateKeyPair().then(keyPair => {
+        // should this be attached to this.state?
+        this.keyPair = keyPair;
+  
+        this.setState(
+          {
+            value: query.data,
+            channelId,
+            clientId: uuid(),
+            connecting: true,
+            messages: this.getInitialNavigateToMessage({ query, link }),
+          },
+          () => {
+            window.history.pushState({}, document.title, "/send");
+  
+            this.handleJoin();
+          }
+        );
+      })
+      .catch(err => {
+        console.error(err);
+      });
     }
   }
 
@@ -253,51 +273,66 @@ export default class Send extends React.Component {
               connecting: false,
               connected: true,
             },
-            () => {
-              this.send({ event: "join", clientId: this.state.clientId, info });
+            async () => {
+              const publicKey = await extractPublicKey({ publicKey: this.keyPair.publicKey });
+              this.state.socket.emit("data", {
+                channelId: this.state.channelId,
+                data: {
+                  event: "join",
+                  clientId: this.state.clientId,
+                  publicKey,
+                  info,
+                },
+              });
             }
           );
         });
 
         socket.on("data", async (msg) => {
-          console.log('encryptedMessage', msg);
-          const message = await decrypt(msg.data, this.cryptoKey);
-          console.log('decryptedMessage', message);
-          if (message) {
-            
+          console.log('data', msg);
+          if (msg && msg.data) {
             const messages = this.state.messages;
-      
-            if (message.clientId !== this.state.clientId) {
-              if (message.event === 'join') {
+            if (msg.data.event === "join") {
+              if (msg.data.clientId !== this.state.clientId) {
+                const peerPublicKey = await importPeerPublicKey({
+                  encodedPeerPublicKey: msg.data.publicKey,
+                });
+
                 messages.push({
                   author: "narrator",
                   type: "text",
                   data: {
-                    text: `Peer joined: ${JSON.stringify(message.info)}`,
-                  }
+                    text: `Peer joined: ${JSON.stringify(msg.data.info)}`,
+                  },
                 });
-                return this.setState({ messages });
+                return this.setState({ messages, peerPublicKey });
+              } else {
+                messages.push({
+                  author: "narrator",
+                  type: "text",
+                  data: {
+                    text: `Connected!`,
+                  },
+                });
+                this.setState({ messages });
               }
-              messages.push({
-                author: "them",
-                type: "text",
-                data: {
-                  text: message.message,
-                },
-              });
-              this.setState({
-                messages
-              });
-            }
-            else if (message.event === 'join') {
-              messages.push({
-                author: "narrator",
-                type: "text",
-                data: {
-                  text: `Connected!`,
-                }
-              });
-              this.setState({ messages });
+            } else if (msg.data.event === "message") {
+              if (msg.data.clientId !== this.state.clientId) {
+                const message = await decrypt({
+                  ciphertext: msg.data.message,
+                  privateKey: this.keyPair.privateKey,
+                });
+                messages.push({
+                  author: "them",
+                  type: "text",
+                  data: {
+                    text: message,
+                  },
+                });
+                this.setState({
+                  messages,
+                });
+              }
             }
           }
         });
@@ -305,130 +340,117 @@ export default class Send extends React.Component {
     );
   };
 
-  send = async (msg) => {
-    msg = await encrypt(msg, this.cryptoKey);
+  send = async ({ message = '' }) => {
+    const ciphertext = await encrypt({
+      plaintext: message,
+      peerPublicKey: this.state.peerPublicKey,
+    });
+
     this.state.socket.emit("data", {
       channelId: this.state.channelId,
-      data: msg,
+      data: {
+        message: ciphertext,
+        clientId: this.state.clientId,
+        event: "message",
+      },
     });
   };
 
-  handleConnect = () => {
-    window.crypto.subtle
-      .generateKey(
-        {
-          name: "AES-GCM",
-          length: 256,
+  getInitialMessage = ({ value, link }) => {
+    return [
+      {
+        author: "narrator",
+        type: "text",
+        data: {
+          text: `To establish a peer to peer chat, have a friend scan the following QR code or navigate to the below link.`,
         },
-        true,
-        ["encrypt", "decrypt"]
-      )
-      .then((key) => {
-        this.cryptoKey = key;
-        crypto.subtle.exportKey("raw", key).then((rawKey) => {
-          const outKey = arrayBufferToBase64(rawKey);
-          const channelId = uuid();
-          const value = btoa(
-            JSON.stringify({
-              key: outKey,
-              channelId,
-              event: "qarr-join-chat",
-            })
-          );
-          const link = window.location.href + `?data=${value}`;
-          this.setState(
-            {
-              key: outKey,
-              value,
-              channelId,
-              // client id should include info about the device
-              clientId: uuid(),
-              connecting: true,
-              hasInitiated: true,
-              peers: [info],
-              messages: [
-                {
-                  author: "narrator",
-                  type: "text",
-                  data: {
-                    text: `To establish a peer to peer chat, have a friend scan the following QR code or navigate to the below link.`,
-                  },
-                },
-                {
-                  author: "narrator",
-                  type: "text",
-                  data: {
-                    text: (
-                      <div>
-                        <div style={{ textAlign: "center" }}>
-                          <QRCodeComp
-                            value={value}
-                            style={{
-                              maxWidth:
-                                document.documentElement.clientWidth <= 500
-                                  ? "225px"
-                                  : "400px",
-                              maxHeight:
-                                document.documentElement.clientWidth <= 500
-                                  ? "225px"
-                                  : "400px",
-                              width: "100%",
-                            }}
-                          />
-                        </div>
-                        <div>
-                          <div
-                            className="field has-addons width-100"
-                            style={{
-                              marginLeft: "auto",
-                              marginRight: "auto",
-                              width: "100%",
-                            }}
-                          >
-                            <div
-                              className="control"
-                              style={{ width: "320px", marginLeft: "auto" }}
-                            >
-                              <input
-                                className="input"
-                                type="text"
-                                id="joinLink"
-                                defaultValue={link}
-                              />
-                            </div>
-                            <div
-                              className="control"
-                              style={{ marginRight: "auto" }}
-                            >
-                              {/* <a className="button is-info">
-                                          Copy
-                                      </a> */}
-                              <CopyButton
-                                className="is-link"
-                                target="#joinLink"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  },
-                },
-                {
-                  author: "narrator",
-                  type: "text",
-                  data: {
-                    text: `Please wait while we connect...`,
-                  },
-                },
-              ],
-            },
-            () => {
-              this.handleJoin();
-            }
-          );
-        });
-      });
+      },
+      {
+        author: "narrator",
+        type: "text",
+        data: {
+          text: (
+            <div>
+              <div style={{ textAlign: "center" }}>
+                <QRCodeComp
+                  value={value}
+                  style={{
+                    maxWidth:
+                      document.documentElement.clientWidth <= 500
+                        ? "225px"
+                        : "400px",
+                    maxHeight:
+                      document.documentElement.clientWidth <= 500
+                        ? "225px"
+                        : "400px",
+                    width: "100%",
+                  }}
+                />
+              </div>
+              <div>
+                <div
+                  className="field has-addons width-100"
+                  style={{
+                    marginLeft: "auto",
+                    marginRight: "auto",
+                    width: "100%",
+                  }}
+                >
+                  <div
+                    className="control"
+                    style={{ width: "320px", marginLeft: "auto" }}
+                  >
+                    <input
+                      className="input"
+                      type="text"
+                      id="joinLink"
+                      defaultValue={link}
+                    />
+                  </div>
+                  <div className="control" style={{ marginRight: "auto" }}>
+                    {/* <a className="button is-info">
+                                Copy
+                            </a> */}
+                    <CopyButton className="is-link" target="#joinLink" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ),
+        },
+      },
+      {
+        author: "narrator",
+        type: "text",
+        data: {
+          text: `Please wait while we connect...`,
+        },
+      },
+    ];
+  };
+
+  handleConnect = async () => {
+    const keyPair = await generateKeyPair();
+    // should this be attached to this.state?
+    this.keyPair = keyPair;
+
+    const channelId = uuid();
+    const value = btoa(JSON.stringify({ channelId }));
+    const link = window.location.href + `?data=${value}`;
+
+    this.setState(
+      {
+        value,
+        channelId,
+        messages: this.getInitialMessage({ value, link }),
+        clientId: uuid(),
+        connecting: true,
+        hasInitiated: true,
+      },
+      () => {
+        this.handleJoin();
+      }
+    );
   };
 
   handleUserChat = (e) => {
@@ -455,11 +477,7 @@ export default class Send extends React.Component {
         messages,
       },
       () => {
-        this.send({
-          event: "message",
-          message: e.data.text,
-          clientId: this.state.clientId,
-        });
+        this.send({ message: e.data.text });
       }
     );
   };
