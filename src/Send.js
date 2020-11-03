@@ -13,7 +13,7 @@ const info = deviceInfo.get();
 
 var io = require("socket.io-client");
 
-function splitIntoChunks(str = '', size = 60) {
+function splitIntoChunks(str = '', size = 90) {
   var chunks = [];
   var chunk = '';
   for (var i = 0; i < str.length; i++) {
@@ -365,7 +365,7 @@ export default class Send extends React.Component {
   };
 
   send = async ({ message = "" }) => {
-    if (message.length > 30) {
+    if (message.length >= 90) {
       const chunks = splitIntoChunks(message);
       for (let chunk of chunks) {
         
