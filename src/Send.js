@@ -13,6 +13,27 @@ const info = deviceInfo.get();
 
 var io = require("socket.io-client");
 
+function splitIntoChunks(str = '', size = 60) {
+  var chunks = [];
+  var chunk = '';
+  for (var i = 0; i < str.length; i++) {
+      if (i && i % size === 0) {
+          chunks.push(chunk);
+          chunk = '';
+      }
+      else {
+          chunk += str[i];
+      }
+  }
+  return chunks;
+}
+
+function wait(timeout = 200) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(), timeout);
+  });
+}
+
 function arrayBufferToBase64(buffer) {
   let binary = "";
   let bytes = new Uint8Array(buffer);
@@ -344,19 +365,43 @@ export default class Send extends React.Component {
   };
 
   send = async ({ message = "" }) => {
-    const ciphertext = await encrypt({
-      plaintext: message,
-      peerPublicKey: this.state.peerPublicKey,
-    });
+    if (message.length > 30) {
+      const chunks = splitIntoChunks(message);
+      for (let chunk of chunks) {
+        
+        const ciphertext = await encrypt({
+          plaintext: chunk,
+          peerPublicKey: this.state.peerPublicKey,
+        });
+    
+        this.state.socket.emit("data", {
+          channelId: this.state.channelId,
+          data: {
+            message: ciphertext,
+            clientId: this.state.clientId,
+            event: "message",
+          },
+        });
 
-    this.state.socket.emit("data", {
-      channelId: this.state.channelId,
-      data: {
-        message: ciphertext,
-        clientId: this.state.clientId,
-        event: "message",
-      },
-    });
+        // hacky attempt to keep the message in order...
+        await wait();
+      }
+    }
+    else {
+      const ciphertext = await encrypt({
+        plaintext: message,
+        peerPublicKey: this.state.peerPublicKey,
+      });
+  
+      this.state.socket.emit("data", {
+        channelId: this.state.channelId,
+        data: {
+          message: ciphertext,
+          clientId: this.state.clientId,
+          event: "message",
+        },
+      });
+    }
   };
 
   getInitialMessage = ({ value, link }) => {
