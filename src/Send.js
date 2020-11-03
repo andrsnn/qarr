@@ -13,7 +13,7 @@ const info = deviceInfo.get();
 
 var io = require("socket.io-client");
 
-function splitIntoChunks(str = '', size = 90) {
+function splitIntoChunks(str = '', size = 30) {
   var chunks = [];
   var chunk = '';
   for (var i = 0; i < str.length; i++) {
@@ -28,11 +28,13 @@ function splitIntoChunks(str = '', size = 90) {
   return chunks;
 }
 
-function wait(timeout = 200) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => resolve(), timeout);
-  });
-}
+// function wait(timeout = 200) {
+//   return new Promise((resolve, reject) => {
+//     setTimeout(() => resolve(), timeout);
+//   });
+// }
+
+const msgChunkState = {};
 
 function arrayBufferToBase64(buffer) {
   let binary = "";
@@ -342,6 +344,40 @@ export default class Send extends React.Component {
               }
             } else if (msg.data.event === "message") {
               if (msg.data.clientId !== this.state.clientId) {
+                try {
+                  const j = JSON.parse(msg.data.message);
+                  if (j.msgId) {
+                    const message = await decrypt({
+                      ciphertext: j.c,
+                      privateKey: this.keyPair.privateKey,
+                    });
+                    j.c = message;
+                    let chunks = msgChunkState[j.msgId] = msgChunkState[j.msgId] || [];
+                    chunks.push(j);
+                    if (chunks.length >= j.len) {
+                      chunks = chunks.sort((a, b) => {
+                        return a.i > b.i ? 1 : -1;
+                      });
+                      const fullMsg = chunks.map(chunk => chunk.c);
+                      messages.push({
+                        author: "them",
+                        type: "text",
+                        data: {
+                          text: fullMsg,
+                        },
+                      });
+                      this.setState({
+                        messages,
+                      });
+                      delete msgChunkState[j.msgId];
+                    }
+                    return;
+                  }
+                }
+                catch(e) {
+
+                }
+
                 const message = await decrypt({
                   ciphertext: msg.data.message,
                   privateKey: this.keyPair.privateKey,
@@ -366,25 +402,36 @@ export default class Send extends React.Component {
 
   send = async ({ message = "" }) => {
     if (message.length >= 90) {
-      const chunks = splitIntoChunks(message);
+      const msgId = uuid();
+      let chunks = splitIntoChunks(message);
+      const encChunks = [];
+
       for (let chunk of chunks) {
-        
         const ciphertext = await encrypt({
           plaintext: chunk,
           peerPublicKey: this.state.peerPublicKey,
         });
-    
+        encChunks.push(ciphertext);
+      }
+
+      const chunksToSend = encChunks.map((c, i) => {
+        return JSON.stringify({
+          len: encChunks.length,
+          msgId,
+          i,
+          c
+        });
+      });
+
+      for (let chunk of chunksToSend) {
         this.state.socket.emit("data", {
           channelId: this.state.channelId,
           data: {
-            message: ciphertext,
+            message: chunk,
             clientId: this.state.clientId,
             event: "message",
           },
         });
-
-        // hacky attempt to keep the message in order...
-        await wait();
       }
     }
     else {
