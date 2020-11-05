@@ -17,16 +17,18 @@ function splitIntoChunks(str = '', size = 30) {
   var chunks = [];
   var chunk = '';
   for (var i = 0; i < str.length; i++) {
+      chunk += str[i];
       if (i && i % size === 0) {
           chunks.push(chunk);
           chunk = '';
       }
-      else {
-          chunk += str[i];
-      }
+  }
+  if (chunk.length) {
+      chunks.push(chunk);
   }
   return chunks;
 }
+
 
 // function wait(timeout = 200) {
 //   return new Promise((resolve, reject) => {
