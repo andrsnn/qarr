@@ -20,7 +20,7 @@
     "gh-pages": "^2.2.0",
     "jsoncomp": "^1.6.1",
     "lz-string": "^1.4.4",
-    "node-sass": "^4.13.1",
+    "node-sass": "^7.0.0",
     "prop-types": "^15.7.2",
     "qrcode": "^1.4.4",
     "react": "^16.13.1",
