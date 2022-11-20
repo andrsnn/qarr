@@ -20,6 +20,8 @@ export class Run extends React.Component {
         this.handleDefault = this.handleDefault.bind(this);
         this.handleStart = this.handleStart.bind(this);
         this.runTimer = this.runTimer.bind(this);
+        this.nextStage = this.nextStage.bind(this);
+
     }
     submit(e) {
         e.preventDefault();
@@ -42,6 +44,12 @@ export class Run extends React.Component {
     handleDefault(options) {
         this.setState(Object.assign({}, this.state, { playVideo: true }, options));
     }
+    nextStage() {
+        if (this.timer) {
+            this.timer.clear();
+            this.runTimer();
+        }
+    }
     runTimer() {
 
         const round = this.state.rounds.shift();
@@ -53,9 +61,8 @@ export class Run extends React.Component {
 
         const {time, name} = round;
 
-
-
         const timer = new Timer({count: time * 60});
+        this.timer = timer;
 
         timer.end = () => {
             this.runTimer();
@@ -168,7 +175,7 @@ export class Run extends React.Component {
                     {
                         !this.state.isRunning ?
                         <button onClick={this.handleStart}>Start</button> :
-                        <h2>{this.state.text}</h2>
+                        <h2 onClick={this.nextStage}>{this.state.text}</h2>
                     }
             </div>
             </div>
