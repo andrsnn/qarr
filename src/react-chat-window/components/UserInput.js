@@ -44,7 +44,7 @@ class UserInput extends Component {
     if (!this.state.emojiPickerIsOpen) {
       this.setState({ emojiPickerIsOpen: true });
     }
-  }
+  };
 
   closeEmojiPicker = (e) => {
     if (this.emojiPickerButton.contains(e.target)) {
@@ -52,7 +52,7 @@ class UserInput extends Component {
       e.preventDefault();
     }
     this.setState({ emojiPickerIsOpen: false });
-  }
+  };
 
   _submitText(event) {
     event.preventDefault();
@@ -84,12 +84,12 @@ class UserInput extends Component {
         data: { emoji }
       });
     }
-  }
+  };
 
   handleEmojiFilterChange = (event) => {
     const emojiFilter = event.target.value;
     this.setState({ emojiFilter });
-  }
+  };
 
   _renderEmojiPopup = () => (
     <PopupWindow
@@ -102,7 +102,7 @@ class UserInput extends Component {
         filter={this.state.emojiFilter}
       />
     </PopupWindow>
-  )
+  );
 
   _renderSendOrFileIcon() {
     // if (this.state.inputHasText) {
