@@ -52,12 +52,12 @@ body {
 }
 .overlay h2 {
     background: #000 none repeat scroll 0 0;
-    color: tan;
+    color: rgb(255, 0, 0);
     font-weight: 600;
     margin: 2rem 3rem 0;
-    mix-blend-mode: overlay;
     padding: 5px 15px;
-    font-size: x-large;
+    font-size: xxx-large;
+    z-index: 999999;
 }
 
 
