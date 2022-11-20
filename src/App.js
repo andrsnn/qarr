@@ -17,7 +17,6 @@ export const password = new Password();
 export default class Root extends React.Component {
   render() {
     const pathname = window.location.pathname;
-    console.log(pathname);
     if (pathname === '/run') {
       return <Run/>
     }
