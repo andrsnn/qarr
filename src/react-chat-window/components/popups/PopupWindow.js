@@ -16,7 +16,7 @@ class PopupWindow extends Component {
     const { isOpen } = this.props;
     const clickedOutside = !this.emojiPopup.contains(e.target) && isOpen;
     clickedOutside && this.props.onClickedOutside(e);
-  }
+  };
 
   render() {
     const { isOpen, children } = this.props;

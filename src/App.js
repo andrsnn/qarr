@@ -9,12 +9,17 @@ import logo from "./logo.svg";
 import { Section } from "./Section";
 import { Scan } from "./Scan";
 import { Create } from "./Create";
+import { Run } from './Run';
 import Send from './Send';
 
 export const password = new Password();
 
 export default class Root extends React.Component {
   render() {
+    const pathname = window.location.pathname;
+    if (pathname === '/run') {
+      return <Run/>
+    }
     return (
       <Router>
         <nav className="navbar" role="navigation" aria-label="main navigation">

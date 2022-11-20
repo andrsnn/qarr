@@ -1,9 +1,9 @@
-import PropTypes from "prop-types";
-import React, { Component } from "react";
-import MessageList from "./MessageList";
-import UserInput from "./UserInput";
-import Header from "./Header";
-import "../styles";
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import MessageList from './MessageList';
+import UserInput from './UserInput';
+import Header from './Header';
+import '../styles';
 
 class ChatWindow extends Component {
   onUserInputSubmit(message) {
