@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, useLocation } from "react-router-dom";
 import "./App.sass";
 import "./App.css";
 
@@ -9,12 +9,18 @@ import logo from "./logo.svg";
 import { Section } from "./Section";
 import { Scan } from "./Scan";
 import { Create } from "./Create";
+import { Run } from './Run';
 import Send from './Send';
 
 export const password = new Password();
 
 export default class Root extends React.Component {
   render() {
+    const pathname = window.location.pathname;
+    console.log(pathname);
+    if (pathname === '/run') {
+      return <Run/>
+    }
     return (
       <Router>
         <nav className="navbar" role="navigation" aria-label="main navigation">

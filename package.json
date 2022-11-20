@@ -20,7 +20,7 @@
     "gh-pages": "^2.2.0",
     "jsoncomp": "^1.6.1",
     "lz-string": "^1.4.4",
-    "node-sass": "^4.13.1",
+    "node-sass": "^8.0.0",
     "prop-types": "^15.7.2",
     "qrcode": "^1.4.4",
     "react": "^16.13.1",
@@ -31,14 +31,14 @@
     "react-loading-overlay": "^1.0.1",
     "react-qr-reader": "^2.2.1",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "3.4.1",
+    "react-scripts": "5.0.1",
     "sdp-transform": "^2.14.0",
     "signalhub": "^4.9.0",
     "socket.io-client": "^2.3.0",
     "uuid": "^7.0.3"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -57,5 +57,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.19.1"
   }
 }
