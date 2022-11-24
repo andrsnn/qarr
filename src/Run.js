@@ -161,16 +161,36 @@ export class Run extends React.Component {
         })
 
         for (let i = 0; i < numRounds; i++) {
-            rounds.push({
-                name: 'Round ' + (i + 1),
-                time: timePerRound * 60,
-                quartiles: quartile(timePerRound)
-            });
-            rounds.push({
-                name: 'Round ' + (i + 1) + ' Cool Down',
-                time: coolDownTime * 60,
-                quartiles: quartile(coolDownTime)
-            });
+            if (i <= Math.floor(numRounds) / 2) {
+                rounds.push({
+                    name: 'Round ' + (i + 1) + ' PT 1',
+                    time: Math.floor(timePerRound / 2) * 60,
+                    quartiles: quartile(timePerRound)
+                });
+                rounds.push({
+                    name: 'Round ' + (i + 1) + ' PT 2',
+                    time: Math.floor(timePerRound / 2) * 60,
+                    quartiles: quartile(timePerRound)
+                });
+                rounds.push({
+                    name: 'Round ' + (i + 1) + ' Cool Down',
+                    time: coolDownTime * 60,
+                    quartiles: quartile(coolDownTime)
+                });
+            }
+            else {
+                rounds.push({
+                    name: 'Round ' + (i + 1),
+                    time: timePerRound * 60,
+                    quartiles: quartile(timePerRound)
+                });
+                rounds.push({
+                    name: 'Round ' + (i + 1) + ' Cool Down',
+                    time: coolDownTime * 60,
+                    quartiles: quartile(coolDownTime)
+                });
+            }
+            
         }
 
         const round = rounds.shift();
@@ -227,7 +247,7 @@ export class Run extends React.Component {
                 </div>
 
                 <div className="overlay">
-                    <div onClick={this.pause}>
+                    <div onClick={this.onComplete}>
                     {
                         !this.state.isRunning ?
                         <button onClick={this.handleStart}>Start</button> :
