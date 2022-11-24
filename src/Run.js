@@ -5,11 +5,12 @@ import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 
 import "./CircleTimerStyles.css"
 
-const renderTime = ({remainingTime}, round, totalTime, totalElapsed) => {
+const renderTime = ({remainingTime}, round, totalTime, totalElapsed, roundsElapsed, numRounds) => {
     if (remainingTime === 0) {
       return (
         <div>
-        <div className="text">{totalElapsed}/{totalTime}</div>
+        <div className="text">{roundsElapsed}/{numRounds} rounds</div>    
+        <div className="text">{totalElapsed}/{totalTime * 60} time</div>
         <div className="text">Done!</div>
         </div>
       );
@@ -49,6 +50,7 @@ export class Run extends React.Component {
             rounds: [],
             round: null,
             totalElapsed: 0,
+            roundsElapsed: 0,
             text: ''
         };
         this.submit = this.submit.bind(this);
@@ -123,10 +125,10 @@ export class Run extends React.Component {
                     return;
                 }
         
-                this.setState({ round, isPlaying: true, totalElapsed: this.state.totalElapsed + round.time });
+                this.setState({ round, isPlaying: true, totalElapsed: this.state.totalElapsed + round.time, roundsElapsed: this.state.roundsElapsed + 1 });
             })
 
-        }, 3000);
+        }, 7000);
     }
     handleStart() {
 
@@ -192,10 +194,10 @@ export class Run extends React.Component {
             }
             
         }
-
+        const len = rounds.length;
         const round = rounds.shift();
 
-        this.setState({ isRunning: true, rounds, round, isPlaying: true, totalElapsed: round.time })
+        this.setState({ isRunning: true, rounds, round, isPlaying: true, totalElapsed: round.time, roundsElapsed: 1, numRounds: len })
     }
     render() {
 
@@ -260,7 +262,7 @@ export class Run extends React.Component {
                             colorsTime={this.state.round.quartiles}
                             onComplete={() => this.onComplete()}
                             >
-                        {(time) => renderTime(time, this.state.round, this.state.totalTime, this.state.totalElapsed)}
+                        {(time) => renderTime(time, this.state.round, this.state.totalTime, this.state.totalElapsed, this.state.roundsElapsed, this.state.numRounds)}
                         </CountdownCircleTimer> : null
                     }
                     
