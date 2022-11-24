@@ -25,6 +25,7 @@
     "qrcode": "^1.4.4",
     "react": "^16.13.1",
     "react-chat-ui": "^0.3.2",
+    "react-countdown-circle-timer": "^3.0.9",
     "react-dom": "^16.13.1",
     "react-highlight.js": "^1.0.7",
     "react-linkify": "^1.0.0-alpha",
