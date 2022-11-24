@@ -156,19 +156,19 @@ export class Run extends React.Component {
 
         rounds.push({
             name: 'Warm Up',
-            time: warmUpTime,
+            time: warmUpTime * 60,
             quartiles: quartile(warmUpTime)
         })
 
         for (let i = 0; i < numRounds; i++) {
             rounds.push({
                 name: 'Round ' + (i + 1),
-                time: timePerRound,
+                time: timePerRound * 60,
                 quartiles: quartile(timePerRound)
             });
             rounds.push({
                 name: 'Round ' + (i + 1) + ' Cool Down',
-                time: coolDownTime,
+                time: coolDownTime * 60,
                 quartiles: quartile(coolDownTime)
             });
         }
