@@ -249,7 +249,7 @@ export class Run extends React.Component {
                 </div>
 
                 <div className="overlay">
-                    <div onClick={this.onComplete}>
+                    <div>
                     {
                         !this.state.isRunning ?
                         <button onClick={this.handleStart}>Start</button> :
